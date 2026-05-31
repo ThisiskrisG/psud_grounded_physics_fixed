@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wobble House Rally AI Collider</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --sky: #1d2b64;
+      --sun: #ffcf6e;
+      --grass: #1fc56b;
+      --road: #222735;
+      --paint: #ff5f7e;
+      --cyan: #58f3ff;
+      --panel: rgba(10, 15, 28, 0.76);
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #111827;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: white;
+    }
+
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .hud,
+    .observer,
+    .storyboard {
+      position: fixed;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: var(--panel);
+      box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.32);
+      backdrop-filter: blur(14px);
+    }
+
+    .hud {
+      left: 1rem;
+      top: 1rem;
+      width: min(25rem, calc(100vw - 2rem));
+      padding: 1rem;
+      border-radius: 1.1rem;
+    }
+
+    .hud h1,
+    .observer h2,
+    .storyboard h2 {
+      margin: 0 0 0.55rem;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.13em;
+    }
+
+    .hud h1 { color: var(--sun); }
+    .observer h2 { color: var(--cyan); }
+    .storyboard h2 { color: #b9ff6a; }
+
+    .hud p,
+    .observer p,
+    .storyboard p {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.76);
+      font-size: 0.85rem;
+      line-height: 1.45;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.8rem;
+    }
+
+    .metric {
+      padding: 0.55rem;
+      border-radius: 0.75rem;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .metric strong {
+      display: block;
+      color: #fff;
+      font-size: 1.1rem;
+    }
+
+    .metric span {
+      color: rgba(255, 255, 255, 0.58);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .observer {
+      right: 1rem;
+      top: 1rem;
+      width: min(24rem, calc(100vw - 2rem));
+      padding: 1rem;
+      border-radius: 1.1rem;
+    }
+
+    .scanline {
+      height: 0.45rem;
+      margin-top: 0.8rem;
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      animation: scan 1.5s linear infinite;
+    }
+
+    .storyboard {
+      left: 1rem;
+      right: 1rem;
+      bottom: 1rem;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.65rem;
+      padding: 0.8rem;
+      border-radius: 1.1rem;
+    }
+
+    .beat {
+      min-height: 4.5rem;
+      padding: 0.7rem;
+      border-radius: 0.85rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .beat.active {
+      border-color: var(--sun);
+      box-shadow: 0 0 1rem rgba(255, 207, 110, 0.24);
+    }
+
+    .beat strong {
+      display: block;
+      font-size: 0.78rem;
+      color: #fff;
+      margin-bottom: 0.2rem;
+    }
+
+    .beat span {
+      color: rgba(255, 255, 255, 0.64);
+      font-size: 0.72rem;
+      line-height: 1.25;
+    }
+
+    @keyframes scan {
+      from { transform: translateX(-35%); opacity: 0.2; }
+      50% { opacity: 1; }
+      to { transform: translateX(35%); opacity: 0.2; }
+    }
+
+    @media (max-width: 900px) {
+      .observer { display: none; }
+      .storyboard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="scene" aria-label="Ground-up funny house car collision prototype"></canvas>
+
+  <section class="hud">
+    <h1>Wobble House Rally AI Collider</h1>
+    <p>Ground-up prototype: a car exits a funny house, collides with props, and an AI observer narrates the physics.</p>
+    <div class="metrics">
+      <div class="metric"><strong id="speedMetric">0</strong><span>speed</span></div>
+      <div class="metric"><strong id="hitMetric">0</strong><span>hits</span></div>
+      <div class="metric"><strong id="beatMetric">01</strong><span>beat</span></div>
+    </div>
+  </section>
+
+  <section class="observer">
+    <h2>AI Lookout</h2>
+    <p id="observerText">Scanning funny house origin, car body, and nearby collision props...</p>
+    <div class="scanline"></div>
+  </section>
+
+  <section class="storyboard" aria-label="Storyboard beats">
+    <div class="beat active"><strong>01 Wake house</strong><span>Garage blinks and nudges the car forward.</span></div>
+    <div class="beat"><strong>02 First roll</strong><span>Car taps cones at low speed.</span></div>
+    <div class="beat"><strong>03 Barrel surprise</strong><span>Rolling props trigger a chain reaction.</span></div>
+    <div class="beat"><strong>04 AI replay</strong><span>Observer labels the collision timeline.</span></div>
+  </section>
+
+  <script>
+    const canvas = document.querySelector('#scene');
+    const ctx = canvas.getContext('2d');
+    const speedMetric = document.querySelector('#speedMetric');
+    const hitMetric = document.querySelector('#hitMetric');
+    const beatMetric = document.querySelector('#beatMetric');
+    const observerText = document.querySelector('#observerText');
+    const beatCards = [...document.querySelectorAll('.beat')];
+
+    const keys = new Set();
+    const world = { width: 2600, height: 900, gravity: 1500, time: 0, hits: 0, beat: 1 };
+    const camera = { x: 0, y: 0, zoom: 1 };
+    const car = {
+      name: 'Peanut Rally Car',
+      x: 420,
+      y: 610,
+      w: 98,
+      h: 46,
+      vx: 120,
+      vy: 0,
+      radius: 46,
+      color: '#ff5f7e',
+      grounded: false,
+    };
+
+    const props = [
+      { name: 'Starter Cone', role: 'soft marker', x: 740, y: 640, radius: 28, vx: 0, vy: 0, color: '#ffcf6e', mass: 0.7 },
+      { name: 'Blue Barrel', role: 'rolling obstacle', x: 930, y: 628, radius: 40, vx: 0, vy: 0, color: '#58f3ff', mass: 1.5 },
+      { name: 'Spring Mailbox', role: 'elastic rebound', x: 1140, y: 636, radius: 34, vx: 0, vy: 0, color: '#b9ff6a', mass: 1.1 },
+      { name: 'Crate Ramp', role: 'stackable puzzle', x: 1360, y: 628, radius: 46, vx: 0, vy: 0, color: '#d9a066', mass: 2.2 },
+      { name: 'Inflatable Bumper', role: 'launch gag', x: 1600, y: 632, radius: 54, vx: 0, vy: 0, color: '#b36bff', mass: 3.0 },
+    ];
+
+    const events = [];
+    const groundY = 682;
+
+    function resize() {
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(innerWidth * dpr);
+      canvas.height = Math.floor(innerHeight * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function recordCollision(source, target, impact) {
+      world.hits += 1;
+      world.beat = clamp(Math.ceil(world.hits / 2) + 1, 1, 4);
+      const summary = `${source.name} hit ${target.name}: ${target.role}; impact ${Math.round(impact)}.`;
+      events.unshift({ summary, age: 0 });
+      events.length = Math.min(events.length, 5);
+      observerText.textContent = `AI Lookout: ${summary}`;
+    }
+
+    function collideCircle(a, b) {
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const dist = Math.hypot(dx, dy) || 1;
+      const minDist = a.radius + b.radius;
+      if (dist >= minDist) return;
+
+      const nx = dx / dist;
+      const ny = dy / dist;
+      const overlap = minDist - dist;
+      a.x -= nx * overlap * 0.35;
+      a.y -= ny * overlap * 0.35;
+      b.x += nx * overlap * 0.65;
+      b.y += ny * overlap * 0.65;
+
+      const rel = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
+      if (rel < -10) return;
+      const impulse = rel * 0.78;
+      a.vx -= nx * impulse * 0.55;
+      a.vy -= ny * impulse * 0.55;
+      b.vx += nx * impulse / b.mass;
+      b.vy += ny * impulse / b.mass;
+      if (b.name.includes('Bumper')) a.vy -= 520;
+      recordCollision(a, b, Math.abs(impulse));
+    }
+
+    function updateBody(body, dt) {
+      body.vy += world.gravity * dt;
+      body.x += body.vx * dt;
+      body.y += body.vy * dt;
+      body.vx *= Math.pow(0.82, dt);
+      body.vy *= Math.pow(0.98, dt);
+
+      if (body.y + body.radius > groundY) {
+        body.y = groundY - body.radius;
+        body.vy *= -0.22;
+        body.vx *= 0.985;
+        body.grounded = true;
+      } else {
+        body.grounded = false;
+      }
+    }
+
+    function update(dt) {
+      world.time += dt;
+      const steer = Number(keys.has('arrowright') || keys.has('d')) - Number(keys.has('arrowleft') || keys.has('a'));
+      const jump = keys.has(' ') || keys.has('arrowup') || keys.has('w');
+      car.vx += steer * 680 * dt;
+      if (jump && car.grounded) car.vy = -620;
+
+      updateBody(car, dt);
+      props.forEach((prop) => updateBody(prop, dt));
+      props.forEach((prop) => collideCircle(car, prop));
+      for (let i = 0; i < props.length; i += 1) {
+        for (let j = i + 1; j < props.length; j += 1) collideCircle(props[i], props[j]);
+      }
+
+      camera.x += (car.x - camera.x - innerWidth * 0.28) * (1 - Math.pow(0.001, dt));
+      camera.x = clamp(camera.x, 0, world.width - innerWidth / camera.zoom);
+      speedMetric.textContent = String(Math.round(Math.abs(car.vx)));
+      hitMetric.textContent = String(world.hits);
+      beatMetric.textContent = String(world.beat).padStart(2, '0');
+      beatCards.forEach((card, index) => card.classList.toggle('active', index + 1 === world.beat));
+      events.forEach((event) => { event.age += dt; });
+    }
+
+    function drawFunnyHouse() {
+      ctx.save();
+      ctx.translate(130, 390);
+      ctx.rotate(Math.sin(world.time * 1.4) * 0.015);
+      ctx.fillStyle = '#7bdff2';
+      ctx.strokeStyle = '#182235';
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.moveTo(0, 110);
+      ctx.quadraticCurveTo(45, -20, 140, 35);
+      ctx.quadraticCurveTo(230, -35, 310, 105);
+      ctx.lineTo(290, 270);
+      ctx.lineTo(20, 270);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#ff5f7e';
+      ctx.beginPath();
+      ctx.moveTo(-18, 110);
+      ctx.quadraticCurveTo(150, -80, 330, 110);
+      ctx.lineTo(292, 132);
+      ctx.quadraticCurveTo(150, -10, 20, 132);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#222735';
+      ctx.fillRect(178, 158, 86, 112);
+      ctx.fillStyle = '#ffcf6e';
+      ctx.fillRect(64, 138, 54, 54);
+      ctx.fillRect(142, 110, 48, 48);
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(214, 208, 6 + Math.sin(world.time * 9) * 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawCar() {
+      ctx.save();
+      ctx.translate(car.x, car.y);
+      ctx.rotate(car.vx * 0.0008);
+      ctx.fillStyle = car.color;
+      ctx.strokeStyle = '#151a28';
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.roundRect(-50, -34, 100, 48, 18);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#58f3ff';
+      ctx.fillRect(-15, -57, 42, 28);
+      ctx.strokeRect(-15, -57, 42, 28);
+      ctx.fillStyle = '#111827';
+      [-32, 34].forEach((x) => {
+        ctx.beginPath();
+        ctx.arc(x, 19, 18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ffcf6e';
+        ctx.stroke();
+      });
+      ctx.restore();
+    }
+
+    function drawProp(prop) {
+      ctx.save();
+      ctx.translate(prop.x, prop.y);
+      ctx.rotate(prop.x * 0.02 + world.time);
+      ctx.fillStyle = prop.color;
+      ctx.strokeStyle = '#151a28';
+      ctx.lineWidth = 5;
+      if (prop.name.includes('Crate')) {
+        ctx.fillRect(-prop.radius, -prop.radius, prop.radius * 2, prop.radius * 2);
+        ctx.strokeRect(-prop.radius, -prop.radius, prop.radius * 2, prop.radius * 2);
+      } else {
+        ctx.beginPath();
+        ctx.arc(0, 0, prop.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#111827';
+      ctx.font = '700 12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(prop.name.split(' ')[0], 0, 4);
+      ctx.restore();
+    }
+
+    function drawObserverRays() {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(88, 243, 255, 0.26)';
+      ctx.lineWidth = 2;
+      const originX = camera.x + innerWidth - 120;
+      const originY = groundY - 18;
+      [car, ...props].forEach((target) => {
+        ctx.beginPath();
+        ctx.moveTo(originX, originY);
+        ctx.lineTo(target.x, target.y);
+        ctx.stroke();
+      });
+      ctx.fillStyle = '#58f3ff';
+      ctx.beginPath();
+      ctx.arc(originX, originY, 16, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function draw() {
+      const sky = ctx.createLinearGradient(0, 0, 0, innerHeight);
+      sky.addColorStop(0, '#1d2b64');
+      sky.addColorStop(0.62, '#ffb36b');
+      sky.addColorStop(1, '#1fc56b');
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, innerWidth, innerHeight);
+
+      ctx.save();
+      ctx.translate(-camera.x, innerHeight - 760);
+      ctx.fillStyle = '#184c38';
+      ctx.fillRect(camera.x, groundY, innerWidth + 40, 220);
+      ctx.fillStyle = '#222735';
+      ctx.fillRect(camera.x, groundY - 8, innerWidth + 40, 92);
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+      ctx.setLineDash([42, 28]);
+      ctx.beginPath();
+      ctx.moveTo(camera.x, groundY + 36);
+      ctx.lineTo(camera.x + innerWidth + 80, groundY + 36);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      drawFunnyHouse();
+      drawObserverRays();
+      props.forEach(drawProp);
+      drawCar();
+
+      ctx.fillStyle = 'rgba(255,255,255,0.82)';
+      ctx.font = '700 15px sans-serif';
+      events.forEach((event, index) => {
+        ctx.fillText(event.summary, camera.x + 30, 120 + index * 24);
+      });
+      ctx.restore();
+    }
+
+    let last = performance.now();
+    function frame(now) {
+      const dt = Math.min(0.033, (now - last) / 1000);
+      last = now;
+      update(dt);
+      draw();
+      requestAnimationFrame(frame);
+    }
+
+    addEventListener('resize', resize);
+    addEventListener('keydown', (event) => keys.add(event.key.toLowerCase()));
+    addEventListener('keyup', (event) => keys.delete(event.key.toLowerCase()));
+
+    resize();
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>
