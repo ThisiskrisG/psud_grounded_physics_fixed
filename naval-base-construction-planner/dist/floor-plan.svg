@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 450" role="img">
+<title>Fictional building floor plan</title>
+<rect width="100%" height="100%" fill="#f8fafc" />
+<rect x="40" y="40" width="160" height="120" rx="10" fill="#6ee7f9" stroke="#0f172a" stroke-width="3" />
+<text x="120.0" y="100.0" text-anchor="middle" dominant-baseline="middle" font-family="Inter, Arial" font-size="16" fill="#0f172a">Visitor Atrium</text>
+<rect x="220" y="40" width="220" height="120" rx="10" fill="#93c5fd" stroke="#0f172a" stroke-width="3" />
+<text x="330.0" y="100.0" text-anchor="middle" dominant-baseline="middle" font-family="Inter, Arial" font-size="16" fill="#0f172a">Operations Room</text>
+<rect x="460" y="40" width="160" height="120" rx="10" fill="#fcd34d" stroke="#0f172a" stroke-width="3" />
+<text x="540.0" y="100.0" text-anchor="middle" dominant-baseline="middle" font-family="Inter, Arial" font-size="16" fill="#0f172a">Briefing</text>
+<rect x="40" y="190" width="230" height="150" rx="10" fill="#fca5a5" stroke="#0f172a" stroke-width="3" />
+<text x="155.0" y="265.0" text-anchor="middle" dominant-baseline="middle" font-family="Inter, Arial" font-size="16" fill="#0f172a">Maintenance Shop</text>
+<rect x="300" y="190" width="150" height="150" rx="10" fill="#c4b5fd" stroke="#0f172a" stroke-width="3" />
+<text x="375.0" y="265.0" text-anchor="middle" dominant-baseline="middle" font-family="Inter, Arial" font-size="16" fill="#0f172a">Admin</text>
+<rect x="480" y="190" width="140" height="150" rx="10" fill="#f87171" stroke="#0f172a" stroke-width="3" />
+<text x="550.0" y="265.0" text-anchor="middle" dominant-baseline="middle" font-family="Inter, Arial" font-size="16" fill="#0f172a">Secure Core</text>
+<rect x="40" y="360" width="580" height="52" rx="10" fill="#e5e7eb" stroke="#0f172a" stroke-width="3" />
+<text x="330.0" y="386.0" text-anchor="middle" dominant-baseline="middle" font-family="Inter, Arial" font-size="16" fill="#0f172a">Main Corridor</text>
+</svg>
