@@ -1,0 +1,19 @@
+# PSUD Storyboard Classification Sample
+
+[STORYBOARD] Beat 01: The camera drone opens a lens gate above the arena.
+[PHYSICS] Rift impulse pushes neon objects outward with damping and boundary bounce.
+[CHARACTER] Camera Drone acts like a curious operator, not just a viewport.
+[ENVIRONMENT] Teleport Arena contains glowing grid floors, edges, and particle haze.
+[TONE] Explain the mechanic as spectacular but readable.
+
+[STORYBOARD] Beat 02: Peanut Rally Car leaves the funny house and meets the first cone.
+[PHYSICS] Ground contact, tire roll, cone displacement, and low-energy collision are visible.
+[CHARACTER] AI Lookout describes what hit what and why it moved.
+[ENVIRONMENT] Funny House Street includes road, sidewalk, cones, barrel, mailbox, and bumper.
+[PLUGIN] ai-lookout-comedy-scorer can score collision comedy and safety.
+[IMPORT] wobble-house-rally-ai-collider/docs/STORYBOARD.md supplies beat names.
+
+[STORYBOARD] Beat 03: The construction planner shifts to street view.
+[ENVIRONMENT] Naval Base Planner shows a fictional gatehouse, frontage road, hangar, and operations elevation.
+[IMPORT] naval-base-construction-planner/dist/site-plan.json supplies zones and labels.
+[TONE] Keep all base wording fictional, high-level, and non-operational.

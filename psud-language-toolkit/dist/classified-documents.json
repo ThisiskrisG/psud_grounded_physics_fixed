@@ -1,0 +1,982 @@
+{
+  "tool": "psud-language-toolkit",
+  "purpose": "Classify wording for pseudo-ground physics, storyboards, extensions, plugins, imports, characters, and environments.",
+  "asyncSyntax": "Documents are loaded with asyncio.gather and asyncio.to_thread before classification.",
+  "summary": {
+    "totals": {
+      "CHARACTER": 6,
+      "ENVIRONMENT": 8,
+      "IMPORT": 5,
+      "PHYSICS": 4,
+      "PLUGIN": 3,
+      "STORYBOARD": 6,
+      "TONE": 4
+    },
+    "sources": {
+      "CHARACTER": [
+        "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+        "psud-language-toolkit/examples/storyboard.psud"
+      ],
+      "ENVIRONMENT": [
+        "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+        "psud-language-toolkit/examples/storyboard.psud"
+      ],
+      "IMPORT": [
+        "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+        "psud-language-toolkit/examples/storyboard.psud"
+      ],
+      "PHYSICS": [
+        "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+        "psud-language-toolkit/examples/storyboard.psud"
+      ],
+      "PLUGIN": [
+        "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+        "psud-language-toolkit/examples/storyboard.psud"
+      ],
+      "STORYBOARD": [
+        "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+        "psud-language-toolkit/examples/storyboard.psud"
+      ],
+      "TONE": [
+        "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+        "psud-language-toolkit/examples/storyboard.psud"
+      ]
+    },
+    "dressers": {
+      "PHYSICS": "Physics wording explains motion, collision, force, camera movement, and pseudo-ground rules.",
+      "CHARACTER": "Character wording names actors and clarifies how they behave in the scene.",
+      "ENVIRONMENT": "Environment wording identifies places, props, streets, buildings, and layout context.",
+      "STORYBOARD": "Storyboard wording orders beats, shots, camera direction, and replay moments.",
+      "PLUGIN": "Plugin wording describes optional behavior modules that extend the prototypes.",
+      "IMPORT": "Import wording describes external data or documents consumed by tooling.",
+      "TONE": "Tone wording controls the rollout tongue used to explain mechanics clearly."
+    }
+  },
+  "documents": [
+    {
+      "source": "psud-language-toolkit/examples/storyboard.psud",
+      "tokenCount": 180,
+      "bracketCounts": {
+        "CHARACTER": 2,
+        "ENVIRONMENT": 3,
+        "IMPORT": 2,
+        "PHYSICS": 2,
+        "PLUGIN": 1,
+        "STORYBOARD": 3,
+        "TONE": 2
+      },
+      "topWords": [
+        [
+          "and",
+          10
+        ],
+        [
+          "the",
+          6
+        ],
+        [
+          "storyboard",
+          5
+        ],
+        [
+          "beat",
+          4
+        ],
+        [
+          "a",
+          4
+        ],
+        [
+          "environment",
+          3
+        ],
+        [
+          "camera",
+          2
+        ],
+        [
+          "drone",
+          2
+        ],
+        [
+          "arena",
+          2
+        ],
+        [
+          "physics",
+          2
+        ],
+        [
+          "character",
+          2
+        ],
+        [
+          "tone",
+          2
+        ]
+      ],
+      "classifiedLines": [
+        {
+          "source": "psud-language-toolkit/examples/storyboard.psud",
+          "line": 3,
+          "bracket": "STORYBOARD",
+          "body": "Beat 01: The camera drone opens a lens gate above the arena.",
+          "keywords": [
+            "beat",
+            "the",
+            "camera",
+            "drone",
+            "opens",
+            "a",
+            "lens",
+            "gate",
+            "above",
+            "the"
+          ],
+          "dresser": "Storyboard wording orders beats, shots, camera direction, and replay moments."
+        },
+        {
+          "source": "psud-language-toolkit/examples/storyboard.psud",
+          "line": 4,
+          "bracket": "PHYSICS",
+          "body": "Rift impulse pushes neon objects outward with damping and boundary bounce.",
+          "keywords": [
+            "rift",
+            "impulse",
+            "pushes",
+            "neon",
+            "objects",
+            "outward",
+            "with",
+            "damping",
+            "and",
+            "boundary"
+          ],
+          "dresser": "Physics wording explains motion, collision, force, camera movement, and pseudo-ground rules."
+        },
+        {
+          "source": "psud-language-toolkit/examples/storyboard.psud",
+          "line": 5,
+          "bracket": "CHARACTER",
+          "body": "Camera Drone acts like a curious operator, not just a viewport.",
+          "keywords": [
+            "camera",
+            "drone",
+            "acts",
+            "like",
+            "a",
+            "curious",
+            "operator",
+            "not",
+            "just",
+            "a"
+          ],
+          "dresser": "Character wording names actors and clarifies how they behave in the scene."
+        },
+        {
+          "source": "psud-language-toolkit/examples/storyboard.psud",
+          "line": 6,
+          "bracket": "ENVIRONMENT",
+          "body": "Teleport Arena contains glowing grid floors, edges, and particle haze.",
+          "keywords": [
+            "teleport",
+            "arena",
+            "contains",
+            "glowing",
+            "grid",
+            "floors",
+            "edges",
+            "and",
+            "particle",
+            "haze"
+          ],
+          "dresser": "Environment wording identifies places, props, streets, buildings, and layout context."
+        },
+        {
+          "source": "psud-language-toolkit/examples/storyboard.psud",
+          "line": 7,
+          "bracket": "TONE",
+          "body": "Explain the mechanic as spectacular but readable.",
+          "keywords": [
+            "explain",
+            "the",
+            "mechanic",
+            "as",
+            "spectacular",
+            "but",
+            "readable"
+          ],
+          "dresser": "Tone wording controls the rollout tongue used to explain mechanics clearly."
+        },
+        {
+          "source": "psud-language-toolkit/examples/storyboard.psud",
+          "line": 9,
+          "bracket": "STORYBOARD",
+          "body": "Beat 02: Peanut Rally Car leaves the funny house and meets the first cone.",
+          "keywords": [
+            "beat",
+            "peanut",
+            "rally",
+            "car",
+            "leaves",
+            "the",
+            "funny",
+            "house",
+            "and",
+            "meets"
+          ],
+          "dresser": "Storyboard wording orders beats, shots, camera direction, and replay moments."
+        },
+        {
+          "source": "psud-language-toolkit/examples/storyboard.psud",
+          "line": 10,
+          "bracket": "PHYSICS",
+          "body": "Ground contact, tire roll, cone displacement, and low-energy collision are visible.",
+          "keywords": [
+            "ground",
+            "contact",
+            "tire",
+            "roll",
+            "cone",
+            "displacement",
+            "and",
+            "low-energy",
+            "collision",
+            "are"
+          ],
+          "dresser": "Physics wording explains motion, collision, force, camera movement, and pseudo-ground rules."
+        },
+        {
+          "source": "psud-language-toolkit/examples/storyboard.psud",
+          "line": 11,
+          "bracket": "CHARACTER",
+          "body": "AI Lookout describes what hit what and why it moved.",
+          "keywords": [
+            "ai",
+            "lookout",
+            "describes",
+            "what",
+            "hit",
+            "what",
+            "and",
+            "why",
+            "it",
+            "moved"
+          ],
+          "dresser": "Character wording names actors and clarifies how they behave in the scene."
+        },
+        {
+          "source": "psud-language-toolkit/examples/storyboard.psud",
+          "line": 12,
+          "bracket": "ENVIRONMENT",
+          "body": "Funny House Street includes road, sidewalk, cones, barrel, mailbox, and bumper.",
+          "keywords": [
+            "funny",
+            "house",
+            "street",
+            "includes",
+            "road",
+            "sidewalk",
+            "cones",
+            "barrel",
+            "mailbox",
+            "and"
+          ],
+          "dresser": "Environment wording identifies places, props, streets, buildings, and layout context."
+        },
+        {
+          "source": "psud-language-toolkit/examples/storyboard.psud",
+          "line": 13,
+          "bracket": "PLUGIN",
+          "body": "ai-lookout-comedy-scorer can score collision comedy and safety.",
+          "keywords": [
+            "ai-lookout-comedy-scorer",
+            "can",
+            "score",
+            "collision",
+            "comedy",
+            "and",
+            "safety"
+          ],
+          "dresser": "Plugin wording describes optional behavior modules that extend the prototypes."
+        },
+        {
+          "source": "psud-language-toolkit/examples/storyboard.psud",
+          "line": 14,
+          "bracket": "IMPORT",
+          "body": "wobble-house-rally-ai-collider/docs/STORYBOARD.md supplies beat names.",
+          "keywords": [
+            "wobble-house-rally-ai-collider",
+            "docs",
+            "storyboard",
+            "md",
+            "supplies",
+            "beat",
+            "names"
+          ],
+          "dresser": "Import wording describes external data or documents consumed by tooling."
+        },
+        {
+          "source": "psud-language-toolkit/examples/storyboard.psud",
+          "line": 16,
+          "bracket": "STORYBOARD",
+          "body": "Beat 03: The construction planner shifts to street view.",
+          "keywords": [
+            "beat",
+            "the",
+            "construction",
+            "planner",
+            "shifts",
+            "to",
+            "street",
+            "view"
+          ],
+          "dresser": "Storyboard wording orders beats, shots, camera direction, and replay moments."
+        },
+        {
+          "source": "psud-language-toolkit/examples/storyboard.psud",
+          "line": 17,
+          "bracket": "ENVIRONMENT",
+          "body": "Naval Base Planner shows a fictional gatehouse, frontage road, hangar, and operations elevation.",
+          "keywords": [
+            "naval",
+            "base",
+            "planner",
+            "shows",
+            "a",
+            "fictional",
+            "gatehouse",
+            "frontage",
+            "road",
+            "hangar"
+          ],
+          "dresser": "Environment wording identifies places, props, streets, buildings, and layout context."
+        },
+        {
+          "source": "psud-language-toolkit/examples/storyboard.psud",
+          "line": 18,
+          "bracket": "IMPORT",
+          "body": "naval-base-construction-planner/dist/site-plan.json supplies zones and labels.",
+          "keywords": [
+            "naval-base-construction-planner",
+            "dist",
+            "site-plan",
+            "json",
+            "supplies",
+            "zones",
+            "and",
+            "labels"
+          ],
+          "dresser": "Import wording describes external data or documents consumed by tooling."
+        },
+        {
+          "source": "psud-language-toolkit/examples/storyboard.psud",
+          "line": 19,
+          "bracket": "TONE",
+          "body": "Keep all base wording fictional, high-level, and non-operational.",
+          "keywords": [
+            "keep",
+            "all",
+            "base",
+            "wording",
+            "fictional",
+            "high-level",
+            "and",
+            "non-operational"
+          ],
+          "dresser": "Tone wording controls the rollout tongue used to explain mechanics clearly."
+        }
+      ]
+    },
+    {
+      "source": "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+      "tokenCount": 507,
+      "bracketCounts": {
+        "CHARACTER": 4,
+        "ENVIRONMENT": 5,
+        "IMPORT": 3,
+        "PHYSICS": 2,
+        "PLUGIN": 2,
+        "STORYBOARD": 3,
+        "TONE": 2
+      },
+      "topWords": [
+        [
+          "the",
+          15
+        ],
+        [
+          "and",
+          14
+        ],
+        [
+          "should",
+          8
+        ],
+        [
+          "or",
+          8
+        ],
+        [
+          "plugin",
+          7
+        ],
+        [
+          "character",
+          7
+        ],
+        [
+          "environment",
+          7
+        ],
+        [
+          "storyboard",
+          6
+        ],
+        [
+          "physics",
+          6
+        ],
+        [
+          "ai",
+          6
+        ],
+        [
+          "a",
+          6
+        ],
+        [
+          "characters",
+          5
+        ]
+      ],
+      "classifiedLines": [
+        {
+          "source": "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+          "line": 11,
+          "bracket": "PHYSICS",
+          "body": "` \u2014 gravity, collision, impulses, camera shake, friction, rifts, teleport motion, vehicle motion, ground contact.",
+          "keywords": [
+            "gravity",
+            "collision",
+            "impulses",
+            "camera",
+            "shake",
+            "friction",
+            "rifts",
+            "teleport",
+            "motion",
+            "vehicle"
+          ],
+          "dresser": "Physics wording explains motion, collision, force, camera movement, and pseudo-ground rules."
+        },
+        {
+          "source": "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+          "line": 12,
+          "bracket": "CHARACTER",
+          "body": "` \u2014 named actors such as the camera drone, Peanut Rally Car, AI Lookout, applicants, crew, or narrative guides.",
+          "keywords": [
+            "named",
+            "actors",
+            "such",
+            "as",
+            "the",
+            "camera",
+            "drone",
+            "peanut",
+            "rally",
+            "car"
+          ],
+          "dresser": "Character wording names actors and clarifies how they behave in the scene."
+        },
+        {
+          "source": "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+          "line": 13,
+          "bracket": "ENVIRONMENT",
+          "body": "` \u2014 arenas, funny houses, naval base zones, streets, floors, piers, hangars, gates, rooms, props, and weather.",
+          "keywords": [
+            "arenas",
+            "funny",
+            "houses",
+            "naval",
+            "base",
+            "zones",
+            "streets",
+            "floors",
+            "piers",
+            "hangars"
+          ],
+          "dresser": "Environment wording identifies places, props, streets, buildings, and layout context."
+        },
+        {
+          "source": "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+          "line": 14,
+          "bracket": "STORYBOARD",
+          "body": "` \u2014 beats, shots, camera moves, scene sequence, replay cards, and visual direction.",
+          "keywords": [
+            "beats",
+            "shots",
+            "camera",
+            "moves",
+            "scene",
+            "sequence",
+            "replay",
+            "cards",
+            "and",
+            "visual"
+          ],
+          "dresser": "Storyboard wording orders beats, shots, camera direction, and replay moments."
+        },
+        {
+          "source": "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+          "line": 15,
+          "bracket": "PLUGIN",
+          "body": "` \u2014 optional modules that add behavior while keeping the base prototype stable.",
+          "keywords": [
+            "optional",
+            "modules",
+            "that",
+            "add",
+            "behavior",
+            "while",
+            "keeping",
+            "the",
+            "base",
+            "prototype"
+          ],
+          "dresser": "Plugin wording describes optional behavior modules that extend the prototypes."
+        },
+        {
+          "source": "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+          "line": 16,
+          "bracket": "IMPORT",
+          "body": "` \u2014 data files brought into the system, such as JSON floor plans, SVG layouts, character sheets, or generated manifests.",
+          "keywords": [
+            "data",
+            "files",
+            "brought",
+            "into",
+            "the",
+            "system",
+            "such",
+            "as",
+            "json",
+            "floor"
+          ],
+          "dresser": "Import wording describes external data or documents consumed by tooling."
+        },
+        {
+          "source": "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+          "line": 17,
+          "bracket": "TONE",
+          "body": "` \u2014 rollout tongue: the voice used to explain mechanics to players, developers, or reviewers.",
+          "keywords": [
+            "rollout",
+            "tongue",
+            "the",
+            "voice",
+            "used",
+            "to",
+            "explain",
+            "mechanics",
+            "to",
+            "players"
+          ],
+          "dresser": "Tone wording controls the rollout tongue used to explain mechanics clearly."
+        },
+        {
+          "source": "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+          "line": 24,
+          "bracket": "PLUGIN",
+          "body": "physics.replay_vectors",
+          "keywords": [
+            "physics",
+            "replay",
+            "vectors"
+          ],
+          "dresser": "Plugin wording describes optional behavior modules that extend the prototypes."
+        },
+        {
+          "source": "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+          "line": 25,
+          "bracket": "IMPORT",
+          "body": "dist/site-plan.json",
+          "keywords": [
+            "dist",
+            "site-plan",
+            "json"
+          ],
+          "dresser": "Import wording describes external data or documents consumed by tooling."
+        },
+        {
+          "source": "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+          "line": 26,
+          "bracket": "PHYSICS",
+          "body": "Draw impulse arrows for collisions.",
+          "keywords": [
+            "draw",
+            "impulse",
+            "arrows",
+            "for",
+            "collisions"
+          ],
+          "dresser": "Physics wording explains motion, collision, force, camera movement, and pseudo-ground rules."
+        },
+        {
+          "source": "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+          "line": 27,
+          "bracket": "STORYBOARD",
+          "body": "Add replay cards after each high-impact event.",
+          "keywords": [
+            "add",
+            "replay",
+            "cards",
+            "after",
+            "each",
+            "high-impact",
+            "event"
+          ],
+          "dresser": "Storyboard wording orders beats, shots, camera direction, and replay moments."
+        },
+        {
+          "source": "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+          "line": 65,
+          "bracket": "IMPORT",
+          "body": "naval-base-construction-planner/dist/floor-plan.svg",
+          "keywords": [
+            "naval-base-construction-planner",
+            "dist",
+            "floor-plan",
+            "svg"
+          ],
+          "dresser": "Import wording describes external data or documents consumed by tooling."
+        },
+        {
+          "source": "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+          "line": 66,
+          "bracket": "ENVIRONMENT",
+          "body": "Adds floor-plan rooms and circulation.",
+          "keywords": [
+            "adds",
+            "floor-plan",
+            "rooms",
+            "and",
+            "circulation"
+          ],
+          "dresser": "Environment wording identifies places, props, streets, buildings, and layout context."
+        },
+        {
+          "source": "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+          "line": 67,
+          "bracket": "STORYBOARD",
+          "body": "Supports construction walkthrough shots.",
+          "keywords": [
+            "supports",
+            "construction",
+            "walkthrough",
+            "shots"
+          ],
+          "dresser": "Storyboard wording orders beats, shots, camera direction, and replay moments."
+        },
+        {
+          "source": "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+          "line": 68,
+          "bracket": "TONE",
+          "body": "Explain as fictional planning visualization, not real operations guidance.",
+          "keywords": [
+            "explain",
+            "as",
+            "fictional",
+            "planning",
+            "visualization",
+            "not",
+            "real",
+            "operations",
+            "guidance"
+          ],
+          "dresser": "Tone wording controls the rollout tongue used to explain mechanics clearly."
+        },
+        {
+          "source": "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+          "line": 75,
+          "bracket": "CHARACTER",
+          "body": "AI Lookout` should speak in short observation sentences.",
+          "keywords": [
+            "ai",
+            "lookout",
+            "should",
+            "speak",
+            "in",
+            "short",
+            "observation",
+            "sentences"
+          ],
+          "dresser": "Character wording names actors and clarifies how they behave in the scene."
+        },
+        {
+          "source": "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+          "line": 76,
+          "bracket": "CHARACTER",
+          "body": "Peanut Rally Car` should be described through motion, wobble, and collision reactions.",
+          "keywords": [
+            "peanut",
+            "rally",
+            "car",
+            "should",
+            "be",
+            "described",
+            "through",
+            "motion",
+            "wobble",
+            "and"
+          ],
+          "dresser": "Character wording names actors and clarifies how they behave in the scene."
+        },
+        {
+          "source": "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+          "line": 77,
+          "bracket": "CHARACTER",
+          "body": "Camera Drone` should be described through lens gates, teleport rifts, and scanning verbs.",
+          "keywords": [
+            "camera",
+            "drone",
+            "should",
+            "be",
+            "described",
+            "through",
+            "lens",
+            "gates",
+            "teleport",
+            "rifts"
+          ],
+          "dresser": "Character wording names actors and clarifies how they behave in the scene."
+        },
+        {
+          "source": "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+          "line": 83,
+          "bracket": "ENVIRONMENT",
+          "body": "Funny House` is a story origin and a physical launch point.",
+          "keywords": [
+            "funny",
+            "house",
+            "is",
+            "a",
+            "story",
+            "origin",
+            "and",
+            "a",
+            "physical",
+            "launch"
+          ],
+          "dresser": "Environment wording identifies places, props, streets, buildings, and layout context."
+        },
+        {
+          "source": "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+          "line": 84,
+          "bracket": "ENVIRONMENT",
+          "body": "Teleport Arena` is a physics sandbox with boundaries, rifts, and particles.",
+          "keywords": [
+            "teleport",
+            "arena",
+            "is",
+            "a",
+            "physics",
+            "sandbox",
+            "with",
+            "boundaries",
+            "rifts",
+            "and"
+          ],
+          "dresser": "Environment wording identifies places, props, streets, buildings, and layout context."
+        },
+        {
+          "source": "psud-language-toolkit/docs/EXTENSIONS_PLUGINS_IMPORTS.md",
+          "line": 85,
+          "bracket": "ENVIRONMENT",
+          "body": "Naval Base Planner` is a fictional layout visualization with building/floor/street/site views.",
+          "keywords": [
+            "naval",
+            "base",
+            "planner",
+            "is",
+            "a",
+            "fictional",
+            "layout",
+            "visualization",
+            "with",
+            "building"
+          ],
+          "dresser": "Environment wording identifies places, props, streets, buildings, and layout context."
+        }
+      ]
+    },
+    {
+      "source": "wobble-house-rally-ai-collider/docs/STORYBOARD.md",
+      "tokenCount": 395,
+      "bracketCounts": {},
+      "topWords": [
+        [
+          "a",
+          18
+        ],
+        [
+          "car",
+          15
+        ],
+        [
+          "and",
+          15
+        ],
+        [
+          "the",
+          11
+        ],
+        [
+          "house",
+          8
+        ],
+        [
+          "collision",
+          8
+        ],
+        [
+          "ai",
+          6
+        ],
+        [
+          "from",
+          5
+        ],
+        [
+          "with",
+          4
+        ],
+        [
+          "camera",
+          4
+        ],
+        [
+          "replay",
+          4
+        ],
+        [
+          "should",
+          4
+        ]
+      ],
+      "classifiedLines": []
+    },
+    {
+      "source": "wobble-house-rally-ai-collider/src/engine-plan.md",
+      "tokenCount": 139,
+      "bracketCounts": {},
+      "topWords": [
+        [
+          "and",
+          5
+        ],
+        [
+          "collision",
+          4
+        ],
+        [
+          "for",
+          4
+        ],
+        [
+          "repository",
+          3
+        ],
+        [
+          "car",
+          3
+        ],
+        [
+          "milestone",
+          3
+        ],
+        [
+          "ai",
+          3
+        ],
+        [
+          "observer",
+          3
+        ],
+        [
+          "src",
+          3
+        ],
+        [
+          "the",
+          2
+        ],
+        [
+          "physics",
+          2
+        ],
+        [
+          "storyboard",
+          2
+        ]
+      ],
+      "classifiedLines": []
+    },
+    {
+      "source": "naval-base-construction-planner/README.md",
+      "tokenCount": 162,
+      "bracketCounts": {},
+      "topWords": [
+        [
+          "and",
+          7
+        ],
+        [
+          "construction",
+          5
+        ],
+        [
+          "view",
+          5
+        ],
+        [
+          "naval",
+          4
+        ],
+        [
+          "a",
+          4
+        ],
+        [
+          "python",
+          4
+        ],
+        [
+          "for",
+          4
+        ],
+        [
+          "site",
+          4
+        ],
+        [
+          "src",
+          4
+        ],
+        [
+          "base",
+          3
+        ],
+        [
+          "planner",
+          3
+        ],
+        [
+          "html",
+          3
+        ]
+      ],
+      "classifiedLines": []
+    }
+  ]
+}
