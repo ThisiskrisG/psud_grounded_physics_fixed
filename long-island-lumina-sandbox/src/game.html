@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Long Island Lumina Sandbox</title>
+  <style>
+    :root { color-scheme: dark; --cyan: #67e8f9; --gold: #fde68a; --pink: #fb7185; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #030712; font-family: Inter, ui-sans-serif, system-ui, sans-serif; color: white; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+    .hud, .stage-card, .itch-card {
+      position: fixed; border: 1px solid rgba(255,255,255,.14); background: rgba(3,7,18,.68); backdrop-filter: blur(14px); box-shadow: 0 1rem 3rem rgba(0,0,0,.34);
+    }
+    .hud { left: 1rem; top: 1rem; width: min(28rem, calc(100vw - 2rem)); padding: 1rem; border-radius: 1.1rem; }
+    .hud h1 { margin: 0 0 .4rem; color: var(--gold); font-size: clamp(1.1rem, 3vw, 1.7rem); letter-spacing: -.03em; }
+    .hud p { margin: 0; color: rgba(255,255,255,.74); line-height: 1.45; font-size: .9rem; }
+    .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: .5rem; margin-top: .8rem; }
+    .stat { padding: .55rem; border-radius: .75rem; background: rgba(255,255,255,.08); }
+    .stat strong { display: block; color: var(--cyan); font-size: 1.15rem; }
+    .stat span { color: rgba(255,255,255,.56); font-size: .68rem; text-transform: uppercase; letter-spacing: .1em; }
+    .stage-card { right: 1rem; top: 1rem; width: min(24rem, calc(100vw - 2rem)); padding: 1rem; border-radius: 1.1rem; }
+    .stage-card h2 { margin: 0 0 .4rem; color: var(--cyan); font-size: .9rem; letter-spacing: .12em; text-transform: uppercase; }
+    .stage-card p { margin: 0; color: rgba(255,255,255,.72); line-height: 1.45; font-size: .88rem; }
+    .itch-card { left: 1rem; right: 1rem; bottom: 1rem; display: flex; justify-content: space-between; gap: 1rem; padding: .75rem 1rem; border-radius: 1rem; color: rgba(255,255,255,.78); font-size: .85rem; }
+    .kbd { color: #06111f; background: linear-gradient(135deg, var(--cyan), var(--gold)); padding: .15rem .42rem; border-radius: .4rem; font-weight: 900; }
+    @media (max-width: 850px) { .stage-card { display: none; } .itch-card { flex-direction: column; } }
+  </style>
+</head>
+<body>
+  <canvas id="game" aria-label="Long Island Lumina Sandbox HTML5 game"></canvas>
+  <section class="hud">
+    <h1>Long Island Lumina Sandbox</h1>
+    <p>Show talent in staged suburb city-states: collect sparks, stay in light, and compose screenshots for an itch.io-ready HTML5 game.</p>
+    <div class="stats">
+      <div class="stat"><strong id="score">0</strong><span>talent</span></div>
+      <div class="stat"><strong id="light">0%</strong><span>lit</span></div>
+      <div class="stat"><strong id="scene">01</strong><span>stage</span></div>
+    </div>
+  </section>
+  <aside class="stage-card">
+    <h2 id="stageName">Lighthouse Commons</h2>
+    <p id="stageCopy">Warm civic plaza lighting, shoreline haze, and a staged lighthouse silhouette.</p>
+  </aside>
+  <div class="itch-card">
+    <span><span class="kbd">A/D</span> move · <span class="kbd">W</span> jump · <span class="kbd">1-4</span> stage · click to place spotlight</span>
+    <span>Sandboxed, no network, no storage, no device permissions.</span>
+  </div>
+
+  <script>
+    const canvas = document.querySelector('#game');
+    const ctx = canvas.getContext('2d');
+    const scoreEl = document.querySelector('#score');
+    const lightEl = document.querySelector('#light');
+    const sceneEl = document.querySelector('#scene');
+    const stageNameEl = document.querySelector('#stageName');
+    const stageCopyEl = document.querySelector('#stageCopy');
+    const keys = new Set();
+    const TAU = Math.PI * 2;
+
+    const stages = [
+      { name: 'Lighthouse Commons', copy: 'Warm civic plaza lighting, shoreline haze, and a staged lighthouse silhouette.', sky: ['#0f172a', '#1e3a8a', '#f59e0b'], ground: '#164e63', accent: '#67e8f9', skyline: ['lighthouse', 'plaza', 'trees'] },
+      { name: 'Garden Rail State', copy: 'Progressive suburb rail gardens with glass shelters, murals, and golden platform lights.', sky: ['#1f2937', '#4c1d95', '#fbbf24'], ground: '#14532d', accent: '#86efac', skyline: ['rail', 'gardens', 'apartments'] },
+      { name: 'Harbor Tech Borough', copy: 'A waterfront startup district with blue stage beams, labs, ferry lights, and public art.', sky: ['#020617', '#075985', '#22d3ee'], ground: '#0f766e', accent: '#38bdf8', skyline: ['labs', 'ferry', 'piers'] },
+      { name: 'Boardwalk Future', copy: 'Beachside night market staging with pink rim light, dunes, arcades, and solar canopies.', sky: ['#111827', '#831843', '#fb7185'], ground: '#78350f', accent: '#fb7185', skyline: ['boardwalk', 'arcade', 'dunes'] },
+    ];
+
+    const player = { x: 180, y: 0, vx: 0, vy: 0, w: 34, h: 62, grounded: false, facing: 1 };
+    const camera = { x: 0 };
+    const world = { width: 2400, ground: 0, time: 0, stage: 0, score: 0, lit: 0 };
+    const sparks = [];
+    const spotlights = [];
+
+    function resize() {
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(innerWidth * dpr);
+      canvas.height = Math.floor(innerHeight * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      world.ground = innerHeight - 120;
+      player.y = Math.min(player.y || world.ground - player.h, world.ground - player.h);
+    }
+
+    function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
+    function rand(min, max) { return Math.random() * (max - min) + min; }
+
+    function seedSparks() {
+      sparks.length = 0;
+      for (let i = 0; i < 28; i += 1) {
+        sparks.push({ x: 260 + i * 78 + rand(-18, 18), y: world.ground - rand(75, 230), r: 10, taken: false, phase: rand(0, TAU) });
+      }
+    }
+
+    function setStage(index) {
+      world.stage = clamp(index, 0, stages.length - 1);
+      const stage = stages[world.stage];
+      stageNameEl.textContent = stage.name;
+      stageCopyEl.textContent = stage.copy;
+      sceneEl.textContent = String(world.stage + 1).padStart(2, '0');
+      spotlights.push({ x: player.x + 80, y: world.ground - 220, r: 260, life: 1.2, color: stage.accent });
+    }
+
+    function update(dt) {
+      world.time += dt;
+      const left = keys.has('a') || keys.has('arrowleft');
+      const right = keys.has('d') || keys.has('arrowright');
+      const jump = keys.has('w') || keys.has(' ') || keys.has('arrowup');
+      const move = Number(right) - Number(left);
+      player.vx += move * 980 * dt;
+      player.vx *= Math.pow(0.08, dt);
+      if (move) player.facing = move;
+      if (jump && player.grounded) player.vy = -660;
+      player.vy += 1800 * dt;
+      player.x = clamp(player.x + player.vx * dt, 40, world.width - 80);
+      player.y += player.vy * dt;
+      if (player.y + player.h > world.ground) {
+        player.y = world.ground - player.h;
+        player.vy = 0;
+        player.grounded = true;
+      } else player.grounded = false;
+
+      sparks.forEach((spark) => {
+        if (spark.taken) return;
+        const dx = spark.x - (player.x + player.w / 2);
+        const dy = spark.y - (player.y + player.h / 2);
+        if (Math.hypot(dx, dy) < 44) {
+          spark.taken = true;
+          world.score += 125;
+          spotlights.push({ x: spark.x, y: spark.y, r: 190, life: 0.8, color: stages[world.stage].accent });
+        }
+      });
+
+      for (let i = spotlights.length - 1; i >= 0; i -= 1) {
+        spotlights[i].life -= dt * 0.35;
+        if (spotlights[i].life <= 0) spotlights.splice(i, 1);
+      }
+
+      const stageLights = [innerWidth * 0.24 + camera.x, innerWidth * 0.52 + camera.x, innerWidth * 0.8 + camera.x, ...spotlights.map((s) => s.x)];
+      const nearest = Math.min(...stageLights.map((x) => Math.abs(x - player.x)));
+      world.lit = clamp(1 - nearest / 360, 0, 1);
+      world.score += world.lit * dt * 8;
+      camera.x += (player.x - camera.x - innerWidth * 0.34) * (1 - Math.pow(0.001, dt));
+      camera.x = clamp(camera.x, 0, world.width - innerWidth);
+      scoreEl.textContent = String(Math.floor(world.score));
+      lightEl.textContent = `${Math.round(world.lit * 100)}%`;
+    }
+
+    function drawSky(stage) {
+      const gradient = ctx.createLinearGradient(0, 0, 0, innerHeight);
+      gradient.addColorStop(0, stage.sky[0]);
+      gradient.addColorStop(0.55, stage.sky[1]);
+      gradient.addColorStop(1, stage.sky[2]);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, innerWidth, innerHeight);
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      for (let i = 0; i < 60; i += 1) {
+        const x = (i * 173 + world.stage * 91 - camera.x * 0.12) % innerWidth;
+        const y = 35 + (i * 47) % Math.max(80, innerHeight * 0.4);
+        ctx.fillRect(x, y, 2, 2);
+      }
+    }
+
+    function drawSkyline(stage) {
+      ctx.save();
+      ctx.translate(-camera.x * 0.45, 0);
+      ctx.fillStyle = 'rgba(3,7,18,0.42)';
+      for (let i = 0; i < 18; i += 1) {
+        const w = 80 + (i % 4) * 28;
+        const h = 90 + (i % 5) * 34;
+        ctx.fillRect(i * 150, world.ground - h - 38, w, h);
+      }
+      ctx.fillStyle = stage.accent;
+      if (stage.skyline.includes('lighthouse')) {
+        ctx.fillRect(520, world.ground - 280, 48, 240);
+        ctx.beginPath(); ctx.arc(544, world.ground - 290, 42, 0, TAU); ctx.fill();
+      }
+      if (stage.skyline.includes('rail')) ctx.fillRect(420, world.ground - 92, 520, 18);
+      if (stage.skyline.includes('ferry')) ctx.fillRect(860, world.ground - 120, 220, 42);
+      if (stage.skyline.includes('arcade')) ctx.fillRect(760, world.ground - 170, 180, 130);
+      ctx.restore();
+    }
+
+    function drawGround(stage) {
+      ctx.fillStyle = stage.ground;
+      ctx.fillRect(0, world.ground, innerWidth, innerHeight - world.ground);
+      ctx.fillStyle = 'rgba(255,255,255,0.18)';
+      for (let x = -camera.x % 80; x < innerWidth; x += 80) ctx.fillRect(x, world.ground + 44, 38, 5);
+    }
+
+    function drawStageLighting(stage) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      const fixedLights = [innerWidth * 0.24, innerWidth * 0.52, innerWidth * 0.8];
+      fixedLights.forEach((x, i) => drawCone(x, world.ground - 8, stage.accent, 0.18 + i * 0.02));
+      spotlights.forEach((spot) => {
+        const screenX = spot.x - camera.x;
+        const gradient = ctx.createRadialGradient(screenX, spot.y, 0, screenX, spot.y, spot.r);
+        gradient.addColorStop(0, `${spot.color}99`);
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = gradient;
+        ctx.globalAlpha = spot.life;
+        ctx.beginPath(); ctx.arc(screenX, spot.y, spot.r, 0, TAU); ctx.fill();
+      });
+      ctx.restore();
+      ctx.globalAlpha = 1;
+    }
+
+    function drawCone(x, y, color, alpha) {
+      const gradient = ctx.createLinearGradient(x, 0, x, y);
+      gradient.addColorStop(0, `${color}00`);
+      gradient.addColorStop(1, `${color}88`);
+      ctx.fillStyle = gradient;
+      ctx.globalAlpha = alpha;
+      ctx.beginPath();
+      ctx.moveTo(x - 65, 0);
+      ctx.lineTo(x + 65, 0);
+      ctx.lineTo(x + 210, y);
+      ctx.lineTo(x - 210, y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    function drawSparks(stage) {
+      sparks.forEach((spark) => {
+        if (spark.taken) return;
+        const x = spark.x - camera.x;
+        const y = spark.y + Math.sin(world.time * 4 + spark.phase) * 8;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(world.time * 2 + spark.phase);
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = stage.accent;
+        ctx.fillStyle = stage.accent;
+        ctx.beginPath();
+        for (let i = 0; i < 8; i += 1) {
+          const a = i / 8 * TAU;
+          const r = i % 2 ? 5 : 14;
+          const px = Math.cos(a) * r;
+          const py = Math.sin(a) * r;
+          if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.closePath(); ctx.fill(); ctx.restore();
+      });
+    }
+
+    function drawPlayer(stage) {
+      const x = player.x - camera.x;
+      const y = player.y;
+      ctx.save();
+      ctx.translate(x + player.w / 2, y + player.h / 2);
+      ctx.scale(player.facing, 1);
+      ctx.shadowBlur = 28 * world.lit;
+      ctx.shadowColor = stage.accent;
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(-12, -20, 24, 38);
+      ctx.fillStyle = '#111827';
+      ctx.fillRect(-15, 18, 10, 24);
+      ctx.fillRect(5, 18, 10, 24);
+      ctx.fillStyle = stage.accent;
+      ctx.beginPath(); ctx.arc(0, -34, 15, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#06111f';
+      ctx.fillRect(4, -37, 5, 5);
+      ctx.restore();
+    }
+
+    function draw() {
+      const stage = stages[world.stage];
+      drawSky(stage);
+      drawSkyline(stage);
+      drawStageLighting(stage);
+      drawGround(stage);
+      ctx.save();
+      ctx.translate(-camera.x, 0);
+      ctx.restore();
+      drawSparks(stage);
+      drawPlayer(stage);
+      const vignette = ctx.createRadialGradient(innerWidth / 2, innerHeight / 2, innerWidth * 0.15, innerWidth / 2, innerHeight / 2, innerWidth * 0.75);
+      vignette.addColorStop(0, 'rgba(0,0,0,0)');
+      vignette.addColorStop(1, 'rgba(0,0,0,0.62)');
+      ctx.fillStyle = vignette; ctx.fillRect(0, 0, innerWidth, innerHeight);
+    }
+
+    let last = performance.now();
+    function frame(now) {
+      const dt = Math.min(0.033, (now - last) / 1000);
+      last = now;
+      update(dt);
+      draw();
+      requestAnimationFrame(frame);
+    }
+
+    addEventListener('resize', resize);
+    addEventListener('keydown', (event) => {
+      keys.add(event.key.toLowerCase());
+      if (/^[1-4]$/.test(event.key)) setStage(Number(event.key) - 1);
+    });
+    addEventListener('keyup', (event) => keys.delete(event.key.toLowerCase()));
+    addEventListener('pointerdown', (event) => {
+      spotlights.push({ x: event.clientX + camera.x, y: event.clientY, r: 260, life: 1.25, color: stages[world.stage].accent });
+    });
+
+    resize();
+    seedSparks();
+    setStage(0);
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>

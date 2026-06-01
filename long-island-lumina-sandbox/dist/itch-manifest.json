@@ -1,0 +1,27 @@
+{
+  "title": "Long Island Lumina Sandbox",
+  "target": "itch.io HTML5",
+  "entry": "index.html",
+  "sandboxedEntry": "sandbox.html",
+  "description": "A browser game prototype about talent, lighting, and staging across fictional progressive Long Island-inspired suburb city-states.",
+  "controls": [
+    "A/D or arrows to move",
+    "W/Space/Up to jump",
+    "1-4 to switch stages",
+    "Click/tap to place spotlight"
+  ],
+  "capabilities": {
+    "network": false,
+    "cookies": false,
+    "localStorage": false,
+    "camera": false,
+    "microphone": false,
+    "location": false
+  },
+  "screenshots": [
+    "01-lighthouse-commons.svg",
+    "02-garden-rail-state.svg",
+    "03-harbor-tech-borough.svg",
+    "04-boardwalk-future.svg"
+  ]
+}
