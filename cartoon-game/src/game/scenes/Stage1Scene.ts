@@ -15,6 +15,10 @@ export default class Stage1 extends Phaser.Scene {
   private HEART_SPACING: number = 44
   private HEART_Y: number = 40
 
+  // Audio
+  private audioCtx: AudioContext | null = null
+  private heartbeatTimer: Phaser.Time.TimerEvent | null = null
+
   constructor() { super({ key: 'Stage1' }) }
 
   create() {
@@ -48,6 +52,22 @@ export default class Stage1 extends Phaser.Scene {
 
     // for prototype convenience: restart to Stage2 after 30s if not game over
     this.time.delayedCall(30000, () => { if (!this.isGameOver) this.scene.start('Stage2') })
+
+    // initialize audio and heartbeat loop
+    this.initAudio()
+    this.heartbeatTimer = this.time.addEvent({
+      delay: 900,
+      loop: true,
+      callback: () => {
+        if (this.lives > 0 && !this.isGameOver) {
+          this.playHeartbeatTone()
+        }
+      }
+    })
+
+    // resume audio context on first user interaction (required by browsers)
+    this.input.once('pointerdown', () => this.resumeAudioContext())
+    this.input.keyboard?.once('keydown', () => this.resumeAudioContext())
   }
 
   update() {
@@ -71,6 +91,84 @@ export default class Stage1 extends Phaser.Scene {
         this.incrementScore(10)
       }
     })
+  }
+
+  private initAudio() {
+    if (this.audioCtx) return
+    const AC = (window as any).AudioContext || (window as any).webkitAudioContext
+    if (!AC) return
+    try {
+      this.audioCtx = new AC()
+    } catch (e) {
+      this.audioCtx = null
+    }
+  }
+
+  private resumeAudioContext() {
+    if (!this.audioCtx) return
+    if (this.audioCtx.state === 'suspended') {
+      this.audioCtx.resume().catch(() => {})
+    }
+  }
+
+  private playHeartbeatTone() {
+    if (!this.audioCtx) return
+    const ctx = this.audioCtx
+    const now = ctx.currentTime
+
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+
+    osc.type = 'sine'
+    osc.frequency.setValueAtTime(120, now) // low thump
+
+    gain.gain.setValueAtTime(0.0001, now)
+    gain.gain.exponentialRampToValueAtTime(0.02, now + 0.02)
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.28)
+
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+
+    osc.start(now)
+    osc.stop(now + 0.3)
+
+    // cleanup
+    osc.onended = () => {
+      try { osc.disconnect(); gain.disconnect() } catch (e) {}
+    }
+  }
+
+  private playChime() {
+    if (!this.audioCtx) return
+    const ctx = this.audioCtx
+    const now = ctx.currentTime
+
+    // simple bell/chime using two oscillators
+    const osc1 = ctx.createOscillator()
+    const osc2 = ctx.createOscillator()
+    const gain = ctx.createGain()
+
+    osc1.type = 'sine'
+    osc2.type = 'triangle'
+
+    osc1.frequency.setValueAtTime(800, now)
+    osc2.frequency.setValueAtTime(1100, now)
+
+    gain.gain.setValueAtTime(0.0001, now)
+    gain.gain.exponentialRampToValueAtTime(0.06, now + 0.01)
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5)
+
+    osc1.connect(gain)
+    osc2.connect(gain)
+    gain.connect(ctx.destination)
+
+    osc1.start(now)
+    osc2.start(now)
+
+    osc1.stop(now + 0.5)
+    osc2.stop(now + 0.5)
+
+    osc1.onended = () => { try { osc1.disconnect(); osc2.disconnect(); gain.disconnect() } catch (e) {} }
   }
 
   private createHearts() {
@@ -172,6 +270,9 @@ export default class Stage1 extends Phaser.Scene {
           }
         }
       })
+
+      // play a subtle chime for heart loss
+      this.playChime()
     }
 
     // simple feedback
@@ -239,5 +340,14 @@ export default class Stage1 extends Phaser.Scene {
   private incrementScore(amount: number) {
     this.score += amount
     if (this.scoreText) this.scoreText.setText(`Score: ${this.score}`)
+  }
+
+  shutdown() {
+    // cleanup audio timer if scene shuts down
+    if (this.heartbeatTimer) this.heartbeatTimer.remove(false)
+    if (this.audioCtx) {
+      try { this.audioCtx.close() } catch (e) {}
+      this.audioCtx = null
+    }
   }
 }
