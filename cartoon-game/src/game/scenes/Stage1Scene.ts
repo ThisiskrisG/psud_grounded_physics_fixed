@@ -74,8 +74,12 @@ export default class Stage1 extends Phaser.Scene {
   }
 
   private createHearts() {
-    // remove existing hearts if any
-    this.hearts.forEach(h => h.destroy())
+    // remove existing hearts and stop any heartbeat tweens
+    this.hearts.forEach(h => {
+      const tw = h.getData('heartbeatTween') as Phaser.Tweens.Tween | undefined
+      if (tw) tw.stop()
+      h.destroy()
+    })
     this.hearts = []
 
     const spacing = this.HEART_SPACING
@@ -87,6 +91,19 @@ export default class Stage1 extends Phaser.Scene {
       const x = startX + i * spacing
       const heart = this.add.image(x, y, 'heart').setOrigin(0, 0)
       heart.setScale(this.HEART_SCALE)
+
+      // subtle heartbeat idle animation
+      const beatTween = this.tweens.add({
+        targets: heart,
+        scale: { from: this.HEART_SCALE * 0.95, to: this.HEART_SCALE * 1.06 },
+        duration: 900,
+        ease: 'Sine.easeInOut',
+        yoyo: true,
+        repeat: -1,
+        delay: i * 120
+      })
+      heart.setData('heartbeatTween', beatTween)
+
       this.hearts.push(heart)
     }
   }
@@ -135,6 +152,10 @@ export default class Stage1 extends Phaser.Scene {
     const lostHeartIndex = this.lives // after decrement, this index corresponds to the lost heart
     const lostHeart = this.hearts[lostHeartIndex]
     if (lostHeart) {
+      // stop idle tween first
+      const hb = lostHeart.getData('heartbeatTween') as Phaser.Tweens.Tween | undefined
+      if (hb) hb.stop()
+
       this.tweens.add({
         targets: lostHeart,
         scale: { from: lostHeart.scale, to: lostHeart.scale * 1.6 },
@@ -142,11 +163,13 @@ export default class Stage1 extends Phaser.Scene {
         duration: 350,
         ease: 'Cubic.easeOut',
         onComplete: () => {
-          lostHeart.destroy()
-          // remove from array
-          this.hearts.splice(lostHeartIndex, 1)
-          // reposition remaining hearts to stay right-aligned
-          this.updateHeartPositions()
+          if (lostHeart) {
+            // destroy and remove
+            lostHeart.destroy()
+            this.hearts.splice(lostHeartIndex, 1)
+            // reposition remaining hearts to stay right-aligned
+            this.updateHeartPositions()
+          }
         }
       })
     }
