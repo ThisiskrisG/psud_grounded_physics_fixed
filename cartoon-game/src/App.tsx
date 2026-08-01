@@ -39,13 +39,27 @@ export default function App() {
 
       <div className="controls" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
         <button
+          className={`mute-button ${muted ? 'is-muted' : 'is-on'}`}
           aria-pressed={muted}
           aria-label={muted ? 'Unmute game audio' : 'Mute game audio'}
           onClick={() => setMuted(m => !m)}
-          style={{ padding: '6px 10px', cursor: 'pointer' }}
         >
-          {muted ? 'Unmute' : 'Mute'}
+          <span className="visually-hidden">{muted ? 'Unmute' : 'Mute'}</span>
+
+          {/* Speaker SVG with animated transitions */}
+          <svg className="mute-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <g className="speaker-group">
+              <path className="speaker-body" d="M3 9v6h4l5 4V5L7 9H3z" fill="currentColor" />
+              <path className="sound-wave" d="M16.5 8.5a4.5 4.5 0 010 7" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            </g>
+            <g className="mute-line" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ display: muted ? 'block' : 'none' }}>
+              <line x1="19" y1="5" x2="5" y2="19" />
+            </g>
+          </svg>
+
+          <span className="mute-label">{muted ? 'Unmute' : 'Mute'}</span>
         </button>
+
         <div style={{ fontSize: 14, color: '#444' }}>Use arrow keys to move</div>
       </div>
 
