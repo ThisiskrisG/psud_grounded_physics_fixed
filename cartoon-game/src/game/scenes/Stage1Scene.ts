@@ -6,13 +6,18 @@ export default class Stage1 extends Phaser.Scene {
   private animals!: Phaser.Physics.Arcade.Group
   private score: number = 0
   private scoreText!: Phaser.GameObjects.Text
+  private lives: number = 3
+  private livesText!: Phaser.GameObjects.Text
   private isGameOver: boolean = false
+  private isInvulnerable: boolean = false
 
   constructor() { super({ key: 'Stage1' }) }
 
   create() {
     this.isGameOver = false
+    this.isInvulnerable = false
     this.score = 0
+    this.lives = 3
 
     this.add.text(10, 10, 'Stage 1 - Street Chase', { font: '20px Arial', fill: '#000' })
 
@@ -25,6 +30,7 @@ export default class Stage1 extends Phaser.Scene {
     this.animals = this.physics.add.group()
 
     this.scoreText = this.add.text(600, 10, `Score: ${this.score}`, { font: '20px Arial', fill: '#000' })
+    this.livesText = this.add.text(10, 40, `Lives: ${this.lives}`, { font: '20px Arial', fill: '#000' })
 
     this.time.addEvent({
       delay: 800,
@@ -75,32 +81,71 @@ export default class Stage1 extends Phaser.Scene {
   }
 
   private handlePlayerHit(playerObj: Phaser.GameObjects.GameObject, animalObj: Phaser.GameObjects.GameObject) {
-    if (this.isGameOver) return
-    this.isGameOver = true
+    if (this.isGameOver || this.isInvulnerable) return
 
     const animal = animalObj as Phaser.Physics.Arcade.Sprite
     const player = playerObj as Phaser.Physics.Arcade.Sprite
+
+    // decrement life
+    this.lives -= 1
+    this.livesText.setText(`Lives: ${this.lives}`)
 
     // simple feedback
     this.cameras.main.shake(300, 0.02)
     player.setTint(0xff0000)
 
-    // disable physics interactions
+    // destroy the animal that hit
+    animal.destroy()
+
+    if (this.lives <= 0) {
+      // game over
+      this.isGameOver = true
+      player.setVelocity(0)
+      this.physics.world.disable(player)
+
+      const goText = this.add.text(this.scale.width / 2, this.scale.height / 2 - 20, 'GAME OVER', { font: '48px Arial', fill: '#ff0000' }).setOrigin(0.5)
+      const finalText = this.add.text(this.scale.width / 2, this.scale.height / 2 + 30, `Score: ${this.score}`, { font: '24px Arial', fill: '#000' }).setOrigin(0.5)
+
+      // restart the scene after short delay
+      this.time.delayedCall(2000, () => {
+        goText.destroy()
+        finalText.destroy()
+        this.scene.restart()
+      })
+
+      return
+    }
+
+    // if still has lives, respawn player after short delay with invulnerability
+    this.isInvulnerable = true
     player.setVelocity(0)
     this.physics.world.disable(player)
 
-    // destroy the animal that hit (optional)
-    animal.destroy()
+    // respawn sequence: wait 800ms, move to center bottom, re-enable physics and give brief invulnerability
+    this.time.delayedCall(800, () => {
+      player.enableBody(true, this.scale.width / 2, 520, true, true)
+      player.clearTint()
+      this.physics.world.enable(player)
+      player.setCollideWorldBounds(true)
+      player.setScale(0.6)
 
-    // show game over and final score
-    const goText = this.add.text(this.scale.width / 2, this.scale.height / 2 - 20, 'GAME OVER', { font: '48px Arial', fill: '#ff0000' }).setOrigin(0.5)
-    const finalText = this.add.text(this.scale.width / 2, this.scale.height / 2 + 30, `Score: ${this.score}`, { font: '24px Arial', fill: '#000' }).setOrigin(0.5)
+      // flash effect during invulnerability
+      const flash = this.tweens.add({
+        targets: player,
+        alpha: { from: 0.3, to: 1 },
+        ease: 'Linear',
+        duration: 200,
+        repeat: 6
+      })
 
-    // restart the scene after short delay
-    this.time.delayedCall(2000, () => {
-      goText.destroy()
-      finalText.destroy()
-      this.scene.restart()
+      // end invulnerability after flashes
+      this.time.delayedCall(1400, () => {
+        this.isInvulnerable = false
+        player.setAlpha(1)
+      })
+
+      // re-enable collisions for player
+      this.physics.world.enable(player)
     })
   }
 
