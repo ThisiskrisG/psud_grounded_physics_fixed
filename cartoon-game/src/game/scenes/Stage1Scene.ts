@@ -7,9 +7,10 @@ export default class Stage1 extends Phaser.Scene {
   private score: number = 0
   private scoreText!: Phaser.GameObjects.Text
   private lives: number = 3
-  private livesText!: Phaser.GameObjects.Text
+  private hearts: Phaser.GameObjects.Image[] = []
   private isGameOver: boolean = false
   private isInvulnerable: boolean = false
+  private maxLives: number = 3
 
   constructor() { super({ key: 'Stage1' }) }
 
@@ -17,7 +18,7 @@ export default class Stage1 extends Phaser.Scene {
     this.isGameOver = false
     this.isInvulnerable = false
     this.score = 0
-    this.lives = 3
+    this.lives = this.maxLives
 
     this.add.text(10, 10, 'Stage 1 - Street Chase', { font: '20px Arial', fill: '#000' })
 
@@ -30,7 +31,9 @@ export default class Stage1 extends Phaser.Scene {
     this.animals = this.physics.add.group()
 
     this.scoreText = this.add.text(600, 10, `Score: ${this.score}`, { font: '20px Arial', fill: '#000' })
-    this.livesText = this.add.text(10, 40, `Lives: ${this.lives}`, { font: '20px Arial', fill: '#000' })
+
+    // create heart icons for lives
+    this.createHearts()
 
     this.time.addEvent({
       delay: 800,
@@ -67,6 +70,22 @@ export default class Stage1 extends Phaser.Scene {
     })
   }
 
+  private createHearts() {
+    // remove existing hearts if any
+    this.hearts.forEach(h => h.destroy())
+    this.hearts = []
+
+    const startX = 10
+    const startY = 40
+    const spacing = 36
+
+    for (let i = 0; i < this.maxLives; i++) {
+      const heart = this.add.image(startX + i * spacing, startY, 'heart').setOrigin(0, 0)
+      heart.setScale(0.5)
+      this.hearts.push(heart)
+    }
+  }
+
   private spawnAnimal() {
     const x = Phaser.Math.Between(50, 750)
     const type = Phaser.Math.Between(0, 1) === 0 ? 'dog' : 'cat'
@@ -88,7 +107,24 @@ export default class Stage1 extends Phaser.Scene {
 
     // decrement life
     this.lives -= 1
-    this.livesText.setText(`Lives: ${this.lives}`)
+
+    // animate and remove the heart for the lost life
+    const lostHeartIndex = this.lives // after decrement, this index corresponds to the lost heart
+    const lostHeart = this.hearts[lostHeartIndex]
+    if (lostHeart) {
+      this.tweens.add({
+        targets: lostHeart,
+        scale: { from: lostHeart.scale, to: lostHeart.scale * 1.6 },
+        alpha: { from: 1, to: 0 },
+        duration: 350,
+        ease: 'Cubic.easeOut',
+        onComplete: () => {
+          lostHeart.destroy()
+          // remove from array
+          this.hearts.splice(lostHeartIndex, 1)
+        }
+      })
+    }
 
     // simple feedback
     this.cameras.main.shake(300, 0.02)
