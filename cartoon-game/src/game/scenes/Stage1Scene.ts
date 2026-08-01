@@ -11,6 +11,9 @@ export default class Stage1 extends Phaser.Scene {
   private isGameOver: boolean = false
   private isInvulnerable: boolean = false
   private maxLives: number = 3
+  private HEART_SCALE: number = 0.7
+  private HEART_SPACING: number = 44
+  private HEART_Y: number = 40
 
   constructor() { super({ key: 'Stage1' }) }
 
@@ -32,7 +35,7 @@ export default class Stage1 extends Phaser.Scene {
 
     this.scoreText = this.add.text(600, 10, `Score: ${this.score}`, { font: '20px Arial', fill: '#000' })
 
-    // create heart icons for lives
+    // create heart icons for lives (top-right, below score)
     this.createHearts()
 
     this.time.addEvent({
@@ -75,15 +78,35 @@ export default class Stage1 extends Phaser.Scene {
     this.hearts.forEach(h => h.destroy())
     this.hearts = []
 
-    const startX = 10
-    const startY = 40
-    const spacing = 36
+    const spacing = this.HEART_SPACING
+    const totalWidth = this.maxLives * spacing
+    const startX = this.scale.width - totalWidth - 10
+    const y = this.HEART_Y
 
     for (let i = 0; i < this.maxLives; i++) {
-      const heart = this.add.image(startX + i * spacing, startY, 'heart').setOrigin(0, 0)
-      heart.setScale(0.5)
+      const x = startX + i * spacing
+      const heart = this.add.image(x, y, 'heart').setOrigin(0, 0)
+      heart.setScale(this.HEART_SCALE)
       this.hearts.push(heart)
     }
+  }
+
+  private updateHeartPositions() {
+    const spacing = this.HEART_SPACING
+    const totalWidth = this.hearts.length * spacing
+    const startX = this.scale.width - totalWidth - 10
+    const y = this.HEART_Y
+
+    this.hearts.forEach((heart, i) => {
+      const targetX = startX + i * spacing
+      this.tweens.add({
+        targets: heart,
+        x: targetX,
+        y: y,
+        duration: 250,
+        ease: 'Cubic.easeOut'
+      })
+    })
   }
 
   private spawnAnimal() {
@@ -122,6 +145,8 @@ export default class Stage1 extends Phaser.Scene {
           lostHeart.destroy()
           // remove from array
           this.hearts.splice(lostHeartIndex, 1)
+          // reposition remaining hearts to stay right-aligned
+          this.updateHeartPositions()
         }
       })
     }
