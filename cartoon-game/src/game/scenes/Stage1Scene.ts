@@ -116,13 +116,19 @@ export default class Stage1 extends Phaser.Scene {
       return
     }
 
-    // if still has lives, respawn player after short delay with invulnerability
+    // if still has lives, respawn player after a shorter delay with invulnerability
     this.isInvulnerable = true
     player.setVelocity(0)
     this.physics.world.disable(player)
 
-    // respawn sequence: wait 800ms, move to center bottom, re-enable physics and give brief invulnerability
-    this.time.delayedCall(800, () => {
+    // Faster respawn: 300ms delay, 800ms invulnerability
+    const RESPAWN_DELAY = 300
+    const INVUL_DURATION = 800
+    const FLASH_DURATION = 200
+    const FLASH_REPEAT = Math.max(0, Math.floor(INVUL_DURATION / FLASH_DURATION) - 1)
+
+    this.time.delayedCall(RESPAWN_DELAY, () => {
+      // move player to center-bottom and re-enable physics
       player.enableBody(true, this.scale.width / 2, 520, true, true)
       player.clearTint()
       this.physics.world.enable(player)
@@ -130,22 +136,19 @@ export default class Stage1 extends Phaser.Scene {
       player.setScale(0.6)
 
       // flash effect during invulnerability
-      const flash = this.tweens.add({
+      this.tweens.add({
         targets: player,
         alpha: { from: 0.3, to: 1 },
         ease: 'Linear',
-        duration: 200,
-        repeat: 6
+        duration: FLASH_DURATION,
+        repeat: FLASH_REPEAT
       })
 
-      // end invulnerability after flashes
-      this.time.delayedCall(1400, () => {
+      // end invulnerability after INVUL_DURATION
+      this.time.delayedCall(INVUL_DURATION, () => {
         this.isInvulnerable = false
         player.setAlpha(1)
       })
-
-      // re-enable collisions for player
-      this.physics.world.enable(player)
     })
   }
 
