@@ -19,6 +19,10 @@ export default class Stage1 extends Phaser.Scene {
   private audioCtx: AudioContext | null = null
   private heartbeatTimer: Phaser.Time.TimerEvent | null = null
 
+  // window event handlers for mute/unmute
+  private onUnmuteHandler = () => { this.resumeAudioContext() }
+  private onMuteHandler = () => { this.suspendAudioContext() }
+
   constructor() { super({ key: 'Stage1' }) }
 
   create() {
@@ -55,13 +59,21 @@ export default class Stage1 extends Phaser.Scene {
 
     // initialize audio and heartbeat loop
     this.initAudio()
+
+    // add window listeners so external UI (React) can mute/unmute
+    window.addEventListener('game-unmute', this.onUnmuteHandler)
+    window.addEventListener('game-mute', this.onMuteHandler)
+
     this.heartbeatTimer = this.time.addEvent({
       delay: 900,
       loop: true,
       callback: () => {
-        if (this.lives > 0 && !this.isGameOver) {
-          this.playHeartbeatTone()
-        }
+        try {
+          const globalMuted = (window as any).__GAME_MUTED === true
+          if (this.lives > 0 && !this.isGameOver && !globalMuted) {
+            this.playHeartbeatTone()
+          }
+        } catch (e) {}
       }
     })
 
@@ -111,7 +123,19 @@ export default class Stage1 extends Phaser.Scene {
     }
   }
 
+  private suspendAudioContext() {
+    if (!this.audioCtx) return
+    if (this.audioCtx.state === 'running') {
+      this.audioCtx.suspend().catch(() => {})
+    }
+  }
+
   private playHeartbeatTone() {
+    try {
+      const globalMuted = (window as any).__GAME_MUTED === true
+      if (globalMuted) return
+    } catch (e) { }
+
     if (!this.audioCtx) return
     const ctx = this.audioCtx
     const now = ctx.currentTime
@@ -139,6 +163,11 @@ export default class Stage1 extends Phaser.Scene {
   }
 
   private playChime() {
+    try {
+      const globalMuted = (window as any).__GAME_MUTED === true
+      if (globalMuted) return
+    } catch (e) { }
+
     if (!this.audioCtx) return
     const ctx = this.audioCtx
     const now = ctx.currentTime
@@ -349,5 +378,8 @@ export default class Stage1 extends Phaser.Scene {
       try { this.audioCtx.close() } catch (e) {}
       this.audioCtx = null
     }
+    // remove window listeners
+    window.removeEventListener('game-unmute', this.onUnmuteHandler)
+    window.removeEventListener('game-mute', this.onMuteHandler)
   }
 }
