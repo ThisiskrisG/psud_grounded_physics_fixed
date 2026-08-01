@@ -18,10 +18,12 @@ export default class Stage1 extends Phaser.Scene {
   // Audio
   private audioCtx: AudioContext | null = null
   private heartbeatTimer: Phaser.Time.TimerEvent | null = null
+  private heartbeatSound: Phaser.Sound.BaseSound | null = null
+  private chimeSound: Phaser.Sound.BaseSound | null = null
 
   // window event handlers for mute/unmute
-  private onUnmuteHandler = () => { this.resumeAudioContext() }
-  private onMuteHandler = () => { this.suspendAudioContext() }
+  private onUnmuteHandler = () => { this.resumeAudioContext(); if (this.sound) this.sound.mute = false }
+  private onMuteHandler = () => { this.suspendAudioContext(); if (this.sound) this.sound.mute = true }
 
   constructor() { super({ key: 'Stage1' }) }
 
@@ -60,18 +62,38 @@ export default class Stage1 extends Phaser.Scene {
     // initialize audio and heartbeat loop
     this.initAudio()
 
+    // wire Phaser audio if preloaded; use cache check so audio files are optional
+    try {
+      if (this.cache && (this.cache as any).audio && (this.cache as any).audio.exists('heartbeat')) {
+        this.heartbeatSound = this.sound.add('heartbeat', { volume: 0.12 })
+      }
+      if (this.cache && (this.cache as any).audio && (this.cache as any).audio.exists('chime')) {
+        this.chimeSound = this.sound.add('chime', { volume: 0.18 })
+      }
+    } catch (e) {
+      // ignore — fallback to synthesized tones
+    }
+
     // add window listeners so external UI (React) can mute/unmute
     window.addEventListener('game-unmute', this.onUnmuteHandler)
     window.addEventListener('game-mute', this.onMuteHandler)
+
+    const globalMuted = (window as any).__GAME_MUTED === true
+    if (globalMuted && this.sound) this.sound.mute = true
 
     this.heartbeatTimer = this.time.addEvent({
       delay: 900,
       loop: true,
       callback: () => {
         try {
-          const globalMuted = (window as any).__GAME_MUTED === true
-          if (this.lives > 0 && !this.isGameOver && !globalMuted) {
-            this.playHeartbeatTone()
+          const globalMutedInner = (window as any).__GAME_MUTED === true
+          if (this.lives > 0 && !this.isGameOver && !globalMutedInner) {
+            // prefer loaded audio if available
+            if (this.heartbeatSound) {
+              this.heartbeatSound.play()
+            } else {
+              this.playHeartbeatTone()
+            }
           }
         } catch (e) {}
       }
@@ -117,6 +139,11 @@ export default class Stage1 extends Phaser.Scene {
   }
 
   private resumeAudioContext() {
+    try {
+      const globalMuted = (window as any).__GAME_MUTED === true
+      if (globalMuted && this.sound) this.sound.mute = true
+    } catch (e) {}
+
     if (!this.audioCtx) return
     if (this.audioCtx.state === 'suspended') {
       this.audioCtx.resume().catch(() => {})
@@ -131,11 +158,6 @@ export default class Stage1 extends Phaser.Scene {
   }
 
   private playHeartbeatTone() {
-    try {
-      const globalMuted = (window as any).__GAME_MUTED === true
-      if (globalMuted) return
-    } catch (e) { }
-
     if (!this.audioCtx) return
     const ctx = this.audioCtx
     const now = ctx.currentTime
@@ -162,17 +184,11 @@ export default class Stage1 extends Phaser.Scene {
     }
   }
 
-  private playChime() {
-    try {
-      const globalMuted = (window as any).__GAME_MUTED === true
-      if (globalMuted) return
-    } catch (e) { }
-
+  private playChimeFallback() {
     if (!this.audioCtx) return
     const ctx = this.audioCtx
     const now = ctx.currentTime
 
-    // simple bell/chime using two oscillators
     const osc1 = ctx.createOscillator()
     const osc2 = ctx.createOscillator()
     const gain = ctx.createGain()
@@ -300,8 +316,12 @@ export default class Stage1 extends Phaser.Scene {
         }
       })
 
-      // play a subtle chime for heart loss
-      this.playChime()
+      // play a subtle chime for heart loss (prefer preloaded chime)
+      if (this.chimeSound) {
+        try { this.chimeSound.play() } catch (e) {}
+      } else {
+        this.playChimeFallback()
+      }
     }
 
     // simple feedback
@@ -378,6 +398,8 @@ export default class Stage1 extends Phaser.Scene {
       try { this.audioCtx.close() } catch (e) {}
       this.audioCtx = null
     }
+    // stop Phaser sounds
+    try { if (this.heartbeatSound) this.heartbeatSound.stop(); if (this.chimeSound) this.chimeSound.stop() } catch (e) {}
     // remove window listeners
     window.removeEventListener('game-unmute', this.onUnmuteHandler)
     window.removeEventListener('game-mute', this.onMuteHandler)
