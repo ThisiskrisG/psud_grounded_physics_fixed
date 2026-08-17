@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" role="img">
+  <title>Lighthouse Commons screenshot</title>
+  <defs><linearGradient id="sky" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#0f172a"/><stop offset=".55" stop-color="#1e3a8a"/><stop offset="1" stop-color="#f59e0b"/></linearGradient><radialGradient id="light" cx="50%" cy="35%" r="55%"><stop stop-color="#67e8f999"/><stop offset="1" stop-color="#67e8f900"/></radialGradient></defs>
+  <rect width="1280" height="720" fill="url(#sky)"/>
+  <circle cx="220" cy="140" r="46" fill="#fde68a" opacity=".9"/>
+  <rect y="520" width="1280" height="200" fill="#164e63"/>
+  <path d="M0 520h1280" stroke="#fff" stroke-opacity=".35" stroke-width="6"/>
+  <rect x="770" y="250" width="60" height="270" fill="#67e8f9"/><circle cx="800" cy="235" r="58" fill="#67e8f9"/>
+  <rect x="110" y="390" width="170" height="130" fill="#111827" opacity=".55"/><rect x="350" y="340" width="220" height="180" fill="#111827" opacity=".45"/>
+  <ellipse cx="570" cy="430" rx="410" ry="260" fill="url(#light)"/>
+  <circle cx="480" cy="455" r="22" fill="#67e8f9"/><rect x="465" y="478" width="30" height="56" fill="#f8fafc"/>
+  <text x="60" y="90" font-family="Inter, Arial" font-size="48" font-weight="800" fill="#fff">Lighthouse Commons</text>
+  <text x="60" y="140" font-family="Inter, Arial" font-size="24" fill="#e0f2fe">talent staging · shoreline haze · civic light</text>
+</svg>

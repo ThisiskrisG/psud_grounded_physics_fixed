@@ -1,0 +1,9 @@
+{
+  "name": "Storyboard Creator Suite",
+  "short_name": "Creator Suite",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#07111f",
+  "theme_color": "#67e8f9",
+  "description": "Install prototype games, review storyboards, and manage audience and finance analytics."
+}

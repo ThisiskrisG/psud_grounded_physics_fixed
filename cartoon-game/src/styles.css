@@ -1,0 +1,40 @@
+/* basic styles for the prototype */
+body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #f5f7fa }
+.app { padding: 12px }
+#game-container { width: 800px; height: 600px; margin-top: 10px; border: 2px solid #333 }
+.hud { margin-top: 8px }
+
+/* Controls and mute button */
+.controls { margin-bottom: 6px }
+.mute-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #222;
+  transition: background 160ms ease, transform 160ms ease;
+}
+.mute-button:focus { outline: 2px solid #6aa6ff; outline-offset: 2px }
+.mute-button:hover { background: #f0f7ff }
+.mute-button:active { transform: scale(0.98) }
+
+.mute-icon { display: block; transition: transform 260ms cubic-bezier(.2,.9,.2,1), opacity 180ms ease }
+.mute-button.is-on .mute-icon { transform: scale(1) }
+.mute-button.is-muted .mute-icon { transform: scale(0.92) rotate(-8deg); opacity: 0.8 }
+
+/* animate sound wave when unmuted */
+@keyframes wavePulse {
+  0% { stroke-opacity: 0.25; transform: scale(0.96); }
+  50% { stroke-opacity: 1; transform: scale(1.08); }
+  100% { stroke-opacity: 0.25; transform: scale(0.96); }
+}
+.mute-button.is-on .sound-wave { transform-origin: center; animation: wavePulse 900ms infinite; }
+
+.mute-label { font-size: 13px; font-weight: 600 }
+
+/* visually hidden for accessibility while keeping in DOM */
+.visually-hidden { position: absolute !important; height: 1px; width: 1px; overflow: hidden; clip: rect(1px, 1px, 1px, 1px); white-space: nowrap }

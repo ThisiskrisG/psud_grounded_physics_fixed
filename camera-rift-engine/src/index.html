@@ -1,0 +1,1050 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bird's-Eye Teleport Engine</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --panel: rgba(8, 14, 32, 0.68);
+      --cyan: #62f7ff;
+      --pink: #ff5af7;
+      --gold: #ffd166;
+      --violet: #8d6bff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(91, 80, 255, 0.24), transparent 28rem),
+        radial-gradient(circle at 80% 70%, rgba(255, 90, 247, 0.18), transparent 26rem),
+        #020510;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #eef8ff;
+    }
+
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .hud {
+      position: fixed;
+      inset: 1rem auto auto 1rem;
+      width: min(26rem, calc(100vw - 2rem));
+      padding: 1rem 1.1rem;
+      border: 1px solid rgba(98, 247, 255, 0.28);
+      border-radius: 1.1rem;
+      background: linear-gradient(135deg, rgba(9, 17, 39, 0.78), rgba(20, 8, 38, 0.62));
+      box-shadow: 0 0 2rem rgba(98, 247, 255, 0.12), inset 0 0 1.2rem rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(16px);
+      pointer-events: none;
+    }
+
+    .hud h1 {
+      margin: 0 0 0.45rem;
+      font-size: clamp(1.05rem, 3vw, 1.6rem);
+      line-height: 1.05;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      text-shadow: 0 0 1.1rem rgba(98, 247, 255, 0.74);
+    }
+
+    .hud p {
+      margin: 0;
+      color: rgba(238, 248, 255, 0.76);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.55rem;
+      margin-top: 0.9rem;
+    }
+
+    .stat {
+      padding: 0.55rem;
+      border-radius: 0.75rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .stat strong {
+      display: block;
+      color: var(--cyan);
+      font-size: 1.05rem;
+      letter-spacing: 0.04em;
+    }
+
+    .stat span {
+      color: rgba(238, 248, 255, 0.58);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.13em;
+    }
+
+    .tip {
+      position: fixed;
+      right: 1rem;
+      bottom: 1rem;
+      max-width: min(28rem, calc(100vw - 2rem));
+      padding: 0.85rem 1rem;
+      border-radius: 999px;
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: rgba(238, 248, 255, 0.78);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 0 2rem rgba(141, 107, 255, 0.16);
+      font-size: 0.86rem;
+      pointer-events: none;
+    }
+
+
+    .brand {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.7rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(8, 14, 32, 0.58);
+      box-shadow: 0 0 2rem rgba(255, 90, 247, 0.14);
+      backdrop-filter: blur(14px);
+      pointer-events: none;
+    }
+
+    .logo-mark {
+      width: 2.4rem;
+      height: 2.4rem;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 50% 50%, #ffffff 0 10%, transparent 11%),
+        conic-gradient(from 90deg, var(--cyan), var(--pink), var(--gold), var(--cyan));
+      box-shadow: 0 0 1.3rem rgba(98, 247, 255, 0.58);
+      position: relative;
+    }
+
+    .logo-mark::after {
+      content: "";
+      position: absolute;
+      inset: 0.55rem;
+      border: 2px solid rgba(2, 5, 16, 0.82);
+      border-radius: 50%;
+    }
+
+    .brand strong {
+      display: block;
+      font-size: 0.88rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .brand span {
+      display: block;
+      color: rgba(238, 248, 255, 0.58);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+    }
+
+    .control-deck {
+      position: fixed;
+      left: 1rem;
+      bottom: 1rem;
+      width: min(38rem, calc(100vw - 2rem));
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      padding: 0.85rem;
+      border-radius: 1.15rem;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(5, 10, 25, 0.72);
+      box-shadow: 0 0 2rem rgba(98, 247, 255, 0.1);
+      backdrop-filter: blur(16px);
+    }
+
+    .deck-card {
+      min-width: 0;
+      padding: 0.8rem;
+      border-radius: 0.9rem;
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .deck-card h2 {
+      margin: 0 0 0.55rem;
+      font-size: 0.76rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--cyan);
+    }
+
+    .support-grid,
+    .platform-grid {
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    .support-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .platform-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .switch,
+    .support-field {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.45rem;
+      min-height: 2.4rem;
+      padding: 0.42rem 0.5rem;
+      border-radius: 0.65rem;
+      background: rgba(0, 0, 0, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      color: rgba(238, 248, 255, 0.82);
+      font-size: 0.78rem;
+    }
+
+    .support-field input {
+      width: 4.4rem;
+      border: 1px solid rgba(98, 247, 255, 0.28);
+      border-radius: 0.5rem;
+      background: rgba(2, 5, 16, 0.65);
+      color: #eef8ff;
+      padding: 0.35rem;
+      text-align: right;
+    }
+
+    .switch input {
+      appearance: none;
+      width: 2.45rem;
+      height: 1.25rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+      position: relative;
+      cursor: pointer;
+      transition: 180ms ease;
+    }
+
+    .switch input::after {
+      content: "";
+      position: absolute;
+      top: 0.16rem;
+      left: 0.18rem;
+      width: 0.92rem;
+      height: 0.92rem;
+      border-radius: 50%;
+      background: #eef8ff;
+      transition: 180ms ease;
+    }
+
+    .switch input:checked {
+      background: linear-gradient(90deg, var(--cyan), var(--pink));
+      box-shadow: 0 0 0.85rem rgba(98, 247, 255, 0.38);
+    }
+
+    .switch input:checked::after {
+      transform: translateX(1.14rem);
+    }
+
+    .status-strip {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+    }
+
+    .status-pill {
+      padding: 0.55rem 0.65rem;
+      border-radius: 0.75rem;
+      background: rgba(98, 247, 255, 0.07);
+      border: 1px solid rgba(98, 247, 255, 0.16);
+      font-size: 0.72rem;
+      color: rgba(238, 248, 255, 0.72);
+    }
+
+    .status-pill strong {
+      display: block;
+      color: #fff;
+      font-size: 0.86rem;
+    }
+
+    .auth-panel {
+      position: fixed;
+      right: 1rem;
+      top: 5.2rem;
+      width: min(22rem, calc(100vw - 2rem));
+      padding: 0.95rem;
+      border-radius: 1rem;
+      background: rgba(5, 10, 25, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 2rem rgba(255, 90, 247, 0.12);
+      backdrop-filter: blur(16px);
+    }
+
+    .auth-panel h2,
+    .legal-panel h2 {
+      margin: 0 0 0.65rem;
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .auth-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.45rem;
+      margin-bottom: 0.65rem;
+    }
+
+    button,
+    .auth-panel input,
+    .auth-panel select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      border-radius: 0.65rem;
+      padding: 0.55rem 0.7rem;
+      color: #03101b;
+      background: linear-gradient(135deg, var(--cyan), var(--gold));
+      cursor: pointer;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+
+    button.secondary {
+      color: #eef8ff;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .auth-form {
+      display: none;
+      gap: 0.48rem;
+    }
+
+    .auth-form.active {
+      display: grid;
+    }
+
+    .auth-panel input,
+    .auth-panel select {
+      width: 100%;
+      border: 1px solid rgba(98, 247, 255, 0.22);
+      border-radius: 0.62rem;
+      background: rgba(2, 5, 16, 0.72);
+      color: #eef8ff;
+      padding: 0.62rem;
+    }
+
+    .agreement-row {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.45rem;
+      align-items: start;
+      color: rgba(238, 248, 255, 0.7);
+      font-size: 0.72rem;
+      line-height: 1.35;
+    }
+
+    .auth-message {
+      min-height: 1.1rem;
+      color: var(--cyan);
+      font-size: 0.78rem;
+    }
+
+    .legal-panel {
+      position: fixed;
+      right: 1rem;
+      bottom: 4.3rem;
+      width: min(34rem, calc(100vw - 2rem));
+      max-height: 30vh;
+      overflow: auto;
+      padding: 0.95rem;
+      border-radius: 1rem;
+      background: rgba(5, 10, 25, 0.76);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 2rem rgba(141, 107, 255, 0.12);
+      backdrop-filter: blur(16px);
+    }
+
+    .legal-panel p,
+    .legal-panel li {
+      color: rgba(238, 248, 255, 0.72);
+      font-size: 0.74rem;
+      line-height: 1.4;
+    }
+
+    .legal-panel ul {
+      margin: 0.55rem 0 0;
+      padding-left: 1.1rem;
+    }
+
+    @media (max-width: 980px) {
+      .brand,
+      .auth-panel,
+      .legal-panel {
+        display: none;
+      }
+
+      .control-deck {
+        grid-template-columns: 1fr;
+      }
+
+      .status-strip {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <canvas id="world" aria-label="Bird's-eye neon teleport game engine demo"></canvas>
+
+  <section class="hud" aria-live="polite">
+    <h1>Camera Rift Engine</h1>
+    <p>
+      A top-down prototype where the camera is a living portal: entities materialize through lens gates,
+      get reimagined with neon skins, then teleport into the arena as playable physics objects.
+    </p>
+    <div class="stats">
+      <div class="stat"><strong id="statObjects">0</strong><span>objects</span></div>
+      <div class="stat"><strong id="statRifts">0</strong><span>rifts</span></div>
+      <div class="stat"><strong id="statEnergy">100%</strong><span>camera</span></div>
+    </div>
+  </section>
+
+  <div class="tip">Move camera drone with WASD / arrows · click or tap to open a teleport lens gate</div>
+
+
+  <aside class="brand" aria-label="Product logo">
+    <div class="logo-mark" aria-hidden="true"></div>
+    <div><strong>RiftLens</strong><span>Teleport Engine Suite</span></div>
+  </aside>
+
+  <section class="auth-panel" aria-label="Applicant sign up and login">
+    <h2>Applicants / Account Access</h2>
+    <div class="auth-tabs">
+      <button id="showSignup" type="button">Sign up</button>
+      <button id="showLogin" class="secondary" type="button">Login</button>
+    </div>
+    <form id="signupForm" class="auth-form active">
+      <input id="signupName" name="name" autocomplete="name" placeholder="Applicant / studio name" required />
+      <input id="signupEmail" name="email" type="email" autocomplete="email" placeholder="email@example.com" required />
+      <select id="signupPlatform" name="platform">
+        <option>PC / Web</option>
+        <option>Smart TV</option>
+        <option>Console</option>
+        <option>Multi-platform</option>
+      </select>
+      <label class="agreement-row">
+        <input id="signupAgree" type="checkbox" required />
+        <span>I accept the prototype distribution agreement, copyright notice, trademark notice, and patent-pending disclosure placeholders.</span>
+      </label>
+      <button type="submit">Create applicant profile</button>
+    </form>
+    <form id="loginForm" class="auth-form">
+      <input id="loginEmail" name="email" type="email" autocomplete="email" placeholder="email@example.com" required />
+      <input id="loginCode" name="code" autocomplete="one-time-code" placeholder="access code" required />
+      <button type="submit">Login</button>
+    </form>
+    <div id="authMessage" class="auth-message" role="status"></div>
+  </section>
+
+  <section class="control-deck" aria-label="Player and platform support controls">
+    <div class="deck-card">
+      <h2>Player support inputs</h2>
+      <div class="support-grid">
+        <label class="support-field">Players <input id="playerCount" type="number" min="1" max="64" value="4" /></label>
+        <label class="support-field">Spectators <input id="spectatorCount" type="number" min="0" max="256" value="16" /></label>
+        <label class="support-field">Controllers <input id="controllerCount" type="number" min="0" max="8" value="4" /></label>
+        <label class="support-field">Accessibility <input id="accessibilityCount" type="number" min="0" max="12" value="6" /></label>
+      </div>
+    </div>
+    <div class="deck-card">
+      <h2>TV / Computer / Console switches</h2>
+      <div class="platform-grid">
+        <label class="switch">TV <input class="platform-toggle" data-platform="tv" type="checkbox" checked /></label>
+        <label class="switch">Computer <input class="platform-toggle" data-platform="computer" type="checkbox" checked /></label>
+        <label class="switch">Console <input class="platform-toggle" data-platform="console" type="checkbox" /></label>
+      </div>
+    </div>
+    <div class="status-strip" aria-label="Software availability">
+      <div class="status-pill"><strong id="availabilityBuild">Alpha</strong>Build channel</div>
+      <div class="status-pill"><strong id="availabilityPlatforms">TV + PC</strong>Available on</div>
+      <div class="status-pill"><strong id="availabilityPlayers">4 / 16</strong>Players / viewers</div>
+      <div class="status-pill"><strong id="availabilityDistribution">Demo</strong>Distribution mode</div>
+    </div>
+  </section>
+
+  <section class="legal-panel" aria-label="Distribution and intellectual property statements">
+    <h2>Distribution Agreement + IP Notices</h2>
+    <p>
+      Prototype agreement template: © 2026 RiftLens demo contributors. All rights reserved unless a signed distribution license states otherwise.
+      RiftLens™, Camera Rift Engine™, and the lens logo are placeholder trademarks for product planning and should be cleared before public release.
+    </p>
+    <ul>
+      <li>Patent notice placeholder: teleport-camera gameplay workflows and rendering pipelines may be marked patent-pending only after counsel confirms filings.</li>
+      <li>Distribution requires applicant approval, supported-platform selection, software availability status, and accepted copyright/trademark notices.</li>
+      <li>This in-app text is a product-planning template, not legal advice; replace it with counsel-approved terms before shipping.</li>
+    </ul>
+  </section>
+
+  <script>
+    const canvas = document.querySelector('#world');
+    const ctx = canvas.getContext('2d');
+    const stats = {
+      objects: document.querySelector('#statObjects'),
+      rifts: document.querySelector('#statRifts'),
+      energy: document.querySelector('#statEnergy'),
+    };
+    const ui = {
+      playerCount: document.querySelector('#playerCount'),
+      spectatorCount: document.querySelector('#spectatorCount'),
+      controllerCount: document.querySelector('#controllerCount'),
+      accessibilityCount: document.querySelector('#accessibilityCount'),
+      platformToggles: [...document.querySelectorAll('.platform-toggle')],
+      availabilityPlatforms: document.querySelector('#availabilityPlatforms'),
+      availabilityPlayers: document.querySelector('#availabilityPlayers'),
+      availabilityDistribution: document.querySelector('#availabilityDistribution'),
+      showSignup: document.querySelector('#showSignup'),
+      showLogin: document.querySelector('#showLogin'),
+      signupForm: document.querySelector('#signupForm'),
+      loginForm: document.querySelector('#loginForm'),
+      authMessage: document.querySelector('#authMessage'),
+    };
+
+    const TAU = Math.PI * 2;
+    const keys = new Set();
+    const pointer = { x: 0, y: 0, active: false };
+    const world = {
+      width: 2800,
+      height: 1900,
+      time: 0,
+      spawnTimer: 0,
+      riftCount: 0,
+      cameraEnergy: 1,
+      shake: 0,
+    };
+
+    const camera = {
+      x: world.width / 2,
+      y: world.height / 2,
+      z: 1,
+      targetZ: 1,
+    };
+
+    const drone = {
+      x: world.width / 2,
+      y: world.height / 2,
+      radius: 26,
+      speed: 560,
+      hue: 186,
+    };
+
+    const objects = [];
+    const particles = [];
+    const rifts = [];
+
+    const palettes = [
+      ['#62f7ff', '#206cff', '#dffcff'],
+      ['#ff5af7', '#7c3cff', '#ffe0fb'],
+      ['#ffd166', '#ff7a18', '#fff1bd'],
+      ['#7cff9b', '#0ed2a0', '#e4ffed'],
+    ];
+
+    const productState = {
+      applicants: [],
+      signedInApplicant: null,
+      platforms: {
+        tv: true,
+        computer: true,
+        console: false,
+      },
+      support: {
+        players: 4,
+        spectators: 16,
+        controllers: 4,
+        accessibility: 6,
+      },
+    };
+
+    function syncAvailability() {
+      productState.support.players = Number(ui.playerCount.value || 1);
+      productState.support.spectators = Number(ui.spectatorCount.value || 0);
+      productState.support.controllers = Number(ui.controllerCount.value || 0);
+      productState.support.accessibility = Number(ui.accessibilityCount.value || 0);
+      ui.platformToggles.forEach((toggle) => {
+        productState.platforms[toggle.dataset.platform] = toggle.checked;
+      });
+
+      const activePlatforms = Object.entries(productState.platforms)
+        .filter(([, enabled]) => enabled)
+        .map(([platform]) => ({ tv: 'TV', computer: 'PC', console: 'Console' })[platform]);
+      ui.availabilityPlatforms.textContent = activePlatforms.length ? activePlatforms.join(' + ') : 'Private';
+      ui.availabilityPlayers.textContent = `${productState.support.players} / ${productState.support.spectators}`;
+      ui.availabilityDistribution.textContent = productState.signedInApplicant ? 'Applicant' : 'Demo';
+      drone.speed = 420 + productState.support.controllers * 35;
+      camera.targetZ = productState.platforms.tv ? 0.78 : 0.9;
+    }
+
+    function setAuthMode(mode) {
+      const signup = mode === 'signup';
+      ui.signupForm.classList.toggle('active', signup);
+      ui.loginForm.classList.toggle('active', !signup);
+      ui.showSignup.classList.toggle('secondary', !signup);
+      ui.showLogin.classList.toggle('secondary', signup);
+      ui.authMessage.textContent = signup ? 'Register applicants for distribution review.' : 'Use any registered applicant email and access code DEMO.';
+    }
+
+    function registerApplicant(event) {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const applicant = {
+        name: form.elements.name.value.trim(),
+        email: form.elements.email.value.trim().toLowerCase(),
+        platform: form.elements.platform.value,
+        acceptedAgreementAt: new Date().toISOString(),
+      };
+      productState.applicants.push(applicant);
+      productState.signedInApplicant = applicant;
+      ui.authMessage.textContent = `${applicant.name || 'Applicant'} profile created for ${applicant.platform} review.`;
+      syncAvailability();
+    }
+
+    function loginApplicant(event) {
+      event.preventDefault();
+      const email = event.currentTarget.elements.email.value.trim().toLowerCase();
+      const code = event.currentTarget.elements.code.value.trim().toUpperCase();
+      const applicant = productState.applicants.find((entry) => entry.email === email) || { name: email.split('@')[0] || 'Applicant', email };
+      if (code === 'DEMO') {
+        productState.signedInApplicant = applicant;
+        ui.authMessage.textContent = `${applicant.name} logged in. Distribution controls unlocked in demo mode.`;
+      } else {
+        ui.authMessage.textContent = 'Use access code DEMO for this local prototype.';
+      }
+      syncAvailability();
+    }
+
+    function resize() {
+      const dpr = Math.min(devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(innerWidth * dpr);
+      canvas.height = Math.floor(innerHeight * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      pointer.x = innerWidth / 2;
+      pointer.y = innerHeight / 2;
+    }
+
+    function rand(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function screenToWorld(x, y) {
+      return {
+        x: camera.x + (x - innerWidth / 2) / camera.z,
+        y: camera.y + (y - innerHeight / 2) / camera.z,
+      };
+    }
+
+    function openRift(x, y, intensity = 1) {
+      const palette = palettes[Math.floor(Math.random() * palettes.length)];
+      const rift = {
+        x,
+        y,
+        age: 0,
+        life: rand(1.25, 1.9),
+        radius: rand(72, 128) * intensity,
+        spin: rand(-1, 1),
+        palette,
+      };
+      rifts.push(rift);
+      world.riftCount += 1;
+      world.cameraEnergy = clamp(world.cameraEnergy - 0.11 * intensity, 0.12, 1);
+      world.shake = Math.max(world.shake, 10 * intensity);
+
+      for (let i = 0; i < 4 + intensity * 4; i += 1) {
+        teleportObject(rift, i / 8);
+      }
+      burst(x, y, palette[0], 48 * intensity, rift.radius);
+    }
+
+    function teleportObject(rift, delay = 0) {
+      const palette = rift.palette;
+      const angle = rand(0, TAU);
+      const speed = rand(90, 280);
+      const form = ['crystal', 'orb', 'totem', 'shard'][Math.floor(rand(0, 4))];
+      objects.push({
+        x: rift.x + Math.cos(angle) * rand(8, 28),
+        y: rift.y + Math.sin(angle) * rand(8, 28),
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        radius: rand(13, 32),
+        rotation: rand(0, TAU),
+        spin: rand(-4, 4),
+        hue: rand(0, 360),
+        age: -delay,
+        form,
+        palette,
+        glow: rand(0.65, 1.2),
+      });
+    }
+
+    function burst(x, y, color, count, radius) {
+      for (let i = 0; i < count; i += 1) {
+        const angle = rand(0, TAU);
+        const speed = rand(80, 620);
+        particles.push({
+          x: x + Math.cos(angle) * rand(0, radius * 0.18),
+          y: y + Math.sin(angle) * rand(0, radius * 0.18),
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          age: 0,
+          life: rand(0.45, 1.25),
+          size: rand(1.5, 5),
+          color,
+        });
+      }
+    }
+
+    function update(dt) {
+      world.time += dt;
+      world.spawnTimer -= dt;
+      world.cameraEnergy = clamp(world.cameraEnergy + dt * 0.055, 0, 1);
+      world.shake *= Math.pow(0.02, dt);
+
+      const ix = Number(keys.has('d') || keys.has('arrowright')) - Number(keys.has('a') || keys.has('arrowleft'));
+      const iy = Number(keys.has('s') || keys.has('arrowdown')) - Number(keys.has('w') || keys.has('arrowup'));
+      const mag = Math.hypot(ix, iy) || 1;
+      drone.x = clamp(drone.x + (ix / mag) * drone.speed * dt, 120, world.width - 120);
+      drone.y = clamp(drone.y + (iy / mag) * drone.speed * dt, 120, world.height - 120);
+
+      camera.x += (drone.x - camera.x) * (1 - Math.pow(0.0009, dt));
+      camera.y += (drone.y - camera.y) * (1 - Math.pow(0.0009, dt));
+      const platformZoom = productState.platforms.tv ? 0.78 : productState.platforms.console ? 0.84 : 0.9;
+      camera.targetZ = platformZoom + Math.sin(world.time * 0.45) * 0.025;
+      camera.z += (camera.targetZ - camera.z) * (1 - Math.pow(0.0001, dt));
+
+      if (world.spawnTimer <= 0) {
+        const side = Math.floor(rand(0, 4));
+        const margin = 260;
+        const x = side === 0 ? camera.x - innerWidth * 0.65 : side === 1 ? camera.x + innerWidth * 0.65 : camera.x + rand(-innerWidth * 0.55, innerWidth * 0.55);
+        const y = side === 2 ? camera.y - innerHeight * 0.65 : side === 3 ? camera.y + innerHeight * 0.65 : camera.y + rand(-innerHeight * 0.55, innerHeight * 0.55);
+        openRift(clamp(x, margin, world.width - margin), clamp(y, margin, world.height - margin), rand(0.55, 0.9));
+        world.spawnTimer = rand(2.1, 3.8);
+      }
+
+      for (let i = rifts.length - 1; i >= 0; i -= 1) {
+        const rift = rifts[i];
+        rift.age += dt;
+        if (rift.age > rift.life) rifts.splice(i, 1);
+      }
+
+      for (let i = objects.length - 1; i >= 0; i -= 1) {
+        const object = objects[i];
+        object.age += dt;
+        if (object.age < 0) continue;
+        object.rotation += object.spin * dt;
+        object.vx += (drone.x - object.x) * 0.025 * dt;
+        object.vy += (drone.y - object.y) * 0.025 * dt;
+        object.vx *= Math.pow(0.62, dt);
+        object.vy *= Math.pow(0.62, dt);
+        object.x += object.vx * dt;
+        object.y += object.vy * dt;
+
+        if (object.x < 80 || object.x > world.width - 80) object.vx *= -0.8;
+        if (object.y < 80 || object.y > world.height - 80) object.vy *= -0.8;
+        object.x = clamp(object.x, 80, world.width - 80);
+        object.y = clamp(object.y, 80, world.height - 80);
+
+        if (objects.length > 90 && i < objects.length - 70) objects.splice(i, 1);
+      }
+
+      for (let i = particles.length - 1; i >= 0; i -= 1) {
+        const particle = particles[i];
+        particle.age += dt;
+        particle.vx *= Math.pow(0.18, dt);
+        particle.vy *= Math.pow(0.18, dt);
+        particle.x += particle.vx * dt;
+        particle.y += particle.vy * dt;
+        if (particle.age > particle.life) particles.splice(i, 1);
+      }
+
+      stats.objects.textContent = String(objects.length).padStart(2, '0');
+      stats.rifts.textContent = String(world.riftCount).padStart(2, '0');
+      stats.energy.textContent = `${Math.round(world.cameraEnergy * 100)}%`;
+    }
+
+    function withCamera(draw) {
+      const shakeX = rand(-world.shake, world.shake);
+      const shakeY = rand(-world.shake, world.shake);
+      ctx.save();
+      ctx.translate(innerWidth / 2 + shakeX, innerHeight / 2 + shakeY);
+      ctx.scale(camera.z, camera.z);
+      ctx.translate(-camera.x, -camera.y);
+      draw();
+      ctx.restore();
+    }
+
+    function drawGrid() {
+      ctx.fillStyle = '#030817';
+      ctx.fillRect(0, 0, world.width, world.height);
+
+      const horizon = ctx.createRadialGradient(drone.x, drone.y, 0, drone.x, drone.y, 980);
+      horizon.addColorStop(0, 'rgba(98, 247, 255, 0.13)');
+      horizon.addColorStop(0.45, 'rgba(141, 107, 255, 0.08)');
+      horizon.addColorStop(1, 'rgba(2, 5, 16, 0)');
+      ctx.fillStyle = horizon;
+      ctx.fillRect(0, 0, world.width, world.height);
+
+      ctx.lineWidth = 1;
+      for (let x = 0; x <= world.width; x += 80) {
+        ctx.strokeStyle = x % 400 === 0 ? 'rgba(98,247,255,0.2)' : 'rgba(98,247,255,0.055)';
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, world.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= world.height; y += 80) {
+        ctx.strokeStyle = y % 400 === 0 ? 'rgba(255,90,247,0.18)' : 'rgba(255,255,255,0.045)';
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(world.width, y);
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = 'rgba(255, 209, 102, 0.5)';
+      ctx.lineWidth = 8;
+      ctx.strokeRect(48, 48, world.width - 96, world.height - 96);
+      ctx.strokeStyle = 'rgba(255, 209, 102, 0.14)';
+      ctx.lineWidth = 28;
+      ctx.strokeRect(48, 48, world.width - 96, world.height - 96);
+    }
+
+    function drawRift(rift) {
+      const t = rift.age / rift.life;
+      const alpha = Math.sin(Math.min(1, t) * Math.PI) * (1 - Math.max(0, t - 0.72));
+      const pulse = 1 + Math.sin(world.time * 10 + rift.radius) * 0.06;
+      ctx.save();
+      ctx.translate(rift.x, rift.y);
+      ctx.rotate(world.time * rift.spin);
+      ctx.globalAlpha = alpha;
+      ctx.shadowBlur = 34;
+      ctx.shadowColor = rift.palette[0];
+
+      for (let i = 0; i < 5; i += 1) {
+        ctx.strokeStyle = i % 2 ? rift.palette[1] : rift.palette[0];
+        ctx.lineWidth = 3 + i * 1.4;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, rift.radius * pulse * (1 - i * 0.09), rift.radius * (0.36 + i * 0.04), i * 0.64, 0, TAU);
+        ctx.stroke();
+      }
+
+      const core = ctx.createRadialGradient(0, 0, 0, 0, 0, rift.radius);
+      core.addColorStop(0, 'rgba(255,255,255,0.78)');
+      core.addColorStop(0.24, `${rift.palette[0]}88`);
+      core.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = core;
+      ctx.beginPath();
+      ctx.arc(0, 0, rift.radius, 0, TAU);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawObject(object) {
+      if (object.age < 0) return;
+      const appear = clamp(object.age * 3, 0, 1);
+      ctx.save();
+      ctx.translate(object.x, object.y);
+      ctx.rotate(object.rotation);
+      ctx.scale(appear, appear);
+      ctx.globalAlpha = appear;
+      ctx.shadowBlur = 24 * object.glow;
+      ctx.shadowColor = object.palette[0];
+      ctx.lineWidth = 2;
+
+      if (object.form === 'orb') {
+        const gradient = ctx.createRadialGradient(-object.radius * 0.35, -object.radius * 0.35, 0, 0, 0, object.radius * 1.2);
+        gradient.addColorStop(0, object.palette[2]);
+        gradient.addColorStop(0.42, object.palette[0]);
+        gradient.addColorStop(1, object.palette[1]);
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(0, 0, object.radius, 0, TAU);
+        ctx.fill();
+      } else if (object.form === 'totem') {
+        ctx.fillStyle = object.palette[1];
+        roundRect(-object.radius * 0.62, -object.radius, object.radius * 1.24, object.radius * 2, object.radius * 0.24);
+        ctx.fill();
+        ctx.strokeStyle = object.palette[2];
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = object.palette[0];
+        ctx.strokeStyle = object.palette[2];
+        ctx.beginPath();
+        const points = object.form === 'shard' ? 3 : 6;
+        for (let i = 0; i < points; i += 1) {
+          const a = (i / points) * TAU - Math.PI / 2;
+          const r = object.radius * (i % 2 && points > 4 ? 0.62 : 1);
+          const x = Math.cos(a) * r;
+          const y = Math.sin(a) * r;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      ctx.globalAlpha = appear * 0.7;
+      ctx.strokeStyle = object.palette[2];
+      ctx.beginPath();
+      ctx.arc(0, 0, object.radius * 1.55, 0, TAU * 0.72);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawDrone() {
+      ctx.save();
+      ctx.translate(drone.x, drone.y);
+      ctx.rotate(world.time * 1.6);
+      ctx.shadowBlur = 38;
+      ctx.shadowColor = '#62f7ff';
+
+      const lens = ctx.createRadialGradient(0, 0, 0, 0, 0, 64);
+      lens.addColorStop(0, 'rgba(255,255,255,0.95)');
+      lens.addColorStop(0.22, 'rgba(98,247,255,0.95)');
+      lens.addColorStop(0.58, 'rgba(141,107,255,0.5)');
+      lens.addColorStop(1, 'rgba(98,247,255,0)');
+      ctx.fillStyle = lens;
+      ctx.beginPath();
+      ctx.arc(0, 0, 70, 0, TAU);
+      ctx.fill();
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.75)';
+      ctx.lineWidth = 3;
+      for (let i = 0; i < 3; i += 1) {
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 54 + i * 14, 18 + i * 5, i * 1.05, 0, TAU);
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#020510';
+      ctx.beginPath();
+      ctx.arc(0, 0, drone.radius, 0, TAU);
+      ctx.fill();
+      ctx.strokeStyle = '#62f7ff';
+      ctx.lineWidth = 5;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function roundRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+    }
+
+    function drawParticle(particle) {
+      const alpha = 1 - particle.age / particle.life;
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = particle.color;
+      ctx.shadowBlur = 18;
+      ctx.shadowColor = particle.color;
+      ctx.beginPath();
+      ctx.arc(particle.x, particle.y, particle.size * (0.4 + alpha), 0, TAU);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    function drawVignette() {
+      const vignette = ctx.createRadialGradient(innerWidth / 2, innerHeight / 2, innerWidth * 0.18, innerWidth / 2, innerHeight / 2, innerWidth * 0.78);
+      vignette.addColorStop(0, 'rgba(0,0,0,0)');
+      vignette.addColorStop(1, 'rgba(0,0,0,0.68)');
+      ctx.fillStyle = vignette;
+      ctx.fillRect(0, 0, innerWidth, innerHeight);
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      withCamera(() => {
+        drawGrid();
+        rifts.forEach(drawRift);
+        particles.forEach(drawParticle);
+        objects.forEach(drawObject);
+        drawDrone();
+      });
+      drawVignette();
+    }
+
+    let last = performance.now();
+    function frame(now) {
+      const dt = Math.min(0.033, (now - last) / 1000);
+      last = now;
+      update(dt);
+      draw();
+      requestAnimationFrame(frame);
+    }
+
+    addEventListener('resize', resize);
+    addEventListener('keydown', (event) => keys.add(event.key.toLowerCase()));
+    addEventListener('keyup', (event) => keys.delete(event.key.toLowerCase()));
+    addEventListener('pointermove', (event) => {
+      pointer.x = event.clientX;
+      pointer.y = event.clientY;
+    });
+    addEventListener('pointerdown', (event) => {
+      pointer.active = true;
+      const point = screenToWorld(event.clientX, event.clientY);
+      openRift(clamp(point.x, 160, world.width - 160), clamp(point.y, 160, world.height - 160), 1.15);
+    });
+    addEventListener('pointerup', () => {
+      pointer.active = false;
+    });
+    [ui.playerCount, ui.spectatorCount, ui.controllerCount, ui.accessibilityCount].forEach((input) => {
+      input.addEventListener('input', syncAvailability);
+    });
+    ui.platformToggles.forEach((toggle) => toggle.addEventListener('change', syncAvailability));
+    ui.showSignup.addEventListener('click', () => setAuthMode('signup'));
+    ui.showLogin.addEventListener('click', () => setAuthMode('login'));
+    ui.signupForm.addEventListener('submit', registerApplicant);
+    ui.loginForm.addEventListener('submit', loginApplicant);
+
+    resize();
+    syncAvailability();
+    setAuthMode('signup');
+    openRift(drone.x - 190, drone.y - 80, 1.1);
+    openRift(drone.x + 220, drone.y + 110, 0.85);
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>

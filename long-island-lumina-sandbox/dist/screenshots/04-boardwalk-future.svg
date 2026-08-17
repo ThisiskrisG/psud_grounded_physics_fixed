@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" role="img">
+  <title>Boardwalk Future screenshot</title>
+  <defs><linearGradient id="sky" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#111827"/><stop offset=".55" stop-color="#831843"/><stop offset="1" stop-color="#fb7185"/></linearGradient><radialGradient id="beam" cx="45%" cy="45%" r="55%"><stop stop-color="#fb718599"/><stop offset="1" stop-color="#fb718500"/></radialGradient></defs>
+  <rect width="1280" height="720" fill="url(#sky)"/><rect y="525" width="1280" height="195" fill="#78350f"/>
+  <rect x="0" y="510" width="1280" height="35" fill="#a16207"/><rect x="140" y="360" width="170" height="165" fill="#111827" opacity=".55"/><rect x="780" y="315" width="230" height="210" fill="#111827" opacity=".52"/>
+  <path d="M790 315h230l-40-55H830z" fill="#fb7185"/><path d="M360 505c120-110 280-110 420 0" fill="none" stroke="#fde68a" stroke-width="16" opacity=".75"/>
+  <ellipse cx="590" cy="405" rx="430" ry="280" fill="url(#beam)"/>
+  <circle cx="545" cy="460" r="22" fill="#fb7185"/><rect x="530" y="483" width="30" height="56" fill="#f8fafc"/>
+  <text x="60" y="90" font-family="Inter, Arial" font-size="48" font-weight="800" fill="#fff">Boardwalk Future</text>
+  <text x="60" y="140" font-family="Inter, Arial" font-size="24" fill="#ffe4e6">arcade rim light · dunes · solar canopy staging</text>
+</svg>

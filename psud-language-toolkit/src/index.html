@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PSUD Language Toolkit</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07111f;
+      --panel: rgba(13, 22, 39, 0.84);
+      --line: rgba(255, 255, 255, 0.14);
+      --cyan: #67e8f9;
+      --gold: #fcd34d;
+      --pink: #fb7185;
+      --green: #86efac;
+      --violet: #c4b5fd;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 16% 18%, rgba(103, 232, 249, 0.18), transparent 30rem),
+        radial-gradient(circle at 82% 12%, rgba(196, 181, 253, 0.16), transparent 28rem),
+        var(--bg);
+      color: #ecfeff;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    main {
+      width: min(1180px, calc(100vw - 2rem));
+      margin: 0 auto;
+      padding: 1.25rem 0 2rem;
+    }
+
+    header,
+    section,
+    .card {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.34);
+      backdrop-filter: blur(14px);
+    }
+
+    header {
+      padding: 1.25rem;
+      border-radius: 1.25rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    h1,
+    h2,
+    p { margin-top: 0; }
+
+    h1 {
+      margin-bottom: 0.4rem;
+      font-size: clamp(1.5rem, 4vw, 2.7rem);
+      letter-spacing: -0.05em;
+    }
+
+    p,
+    li {
+      color: rgba(236, 254, 255, 0.74);
+      line-height: 1.5;
+    }
+
+    .badge {
+      padding: 0.75rem 1rem;
+      border-radius: 999px;
+      color: #06111f;
+      background: linear-gradient(135deg, var(--cyan), var(--gold));
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    section {
+      padding: 1rem;
+      border-radius: 1.1rem;
+    }
+
+    h2 {
+      color: var(--cyan);
+      font-size: 1rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 250px;
+      resize: vertical;
+      border: 1px solid rgba(103, 232, 249, 0.22);
+      border-radius: 1rem;
+      padding: 0.9rem;
+      background: rgba(2, 6, 23, 0.74);
+      color: #ecfeff;
+      font: 0.9rem/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    button {
+      margin-top: 0.75rem;
+      border: 0;
+      border-radius: 0.8rem;
+      padding: 0.78rem 1rem;
+      color: #06111f;
+      background: linear-gradient(135deg, var(--cyan), var(--green));
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .brackets,
+    .results,
+    .hooks {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .brackets {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .card {
+      padding: 0.85rem;
+      border-radius: 0.9rem;
+    }
+
+    .card strong {
+      display: block;
+      color: #fff;
+      margin-bottom: 0.3rem;
+    }
+
+    .tag {
+      display: inline-block;
+      margin-bottom: 0.35rem;
+      padding: 0.25rem 0.45rem;
+      border-radius: 0.5rem;
+      background: rgba(103, 232, 249, 0.14);
+      color: var(--cyan);
+      font: 800 0.78rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .output {
+      display: grid;
+      gap: 0.55rem;
+      margin-top: 0.75rem;
+    }
+
+    .output-item {
+      padding: 0.65rem;
+      border-radius: 0.75rem;
+      background: rgba(255, 255, 255, 0.07);
+      border-left: 4px solid var(--gold);
+    }
+
+    .hook-list {
+      padding-left: 1.1rem;
+    }
+
+    @media (max-width: 920px) {
+      header,
+      .grid { grid-template-columns: 1fr; }
+      .brackets { grid-template-columns: 1fr; }
+      .badge { width: max-content; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>PSUD Classification + Lex Parser Console</h1>
+        <p>Arrange pseudo-ground physics, storyboard, character, environment, plugin, and import wording with bracketed syntax that mirrors the Python async parser.</p>
+      </div>
+      <div class="badge">Async Wording</div>
+    </header>
+
+    <div class="grid">
+      <section>
+        <h2>Rollout tongue input</h2>
+        <p>Write bracketed wording. The browser parser classifies each line so documents can explain mechanics and story consistently.</p>
+        <textarea id="input">[STORYBOARD] The camera drone opens a rift above the glowing arena.
+[PHYSICS] Teleported objects bounce against pseudo-ground boundaries with damping.
+[CHARACTER] AI Lookout explains collision impacts in short observation sentences.
+[ENVIRONMENT] Funny House Street contains cones, barrels, mailbox, road, and bumper.
+[PLUGIN] comedy-scorer adds safety and humor scores to collision replay cards.
+[IMPORT] dist/site-plan.json contributes fictional site zones for construction view.
+[TONE] Use vivid language, but keep every mechanic readable.</textarea>
+        <button id="classify" type="button">Classify wording</button>
+        <div id="output" class="output" aria-live="polite"></div>
+      </section>
+
+      <section>
+        <h2>Classification brackets</h2>
+        <div id="brackets" class="brackets"></div>
+      </section>
+    </div>
+
+    <section style="margin-top:1rem">
+      <h2>Extensions, plugins, and imports</h2>
+      <div class="hooks">
+        <div class="card">
+          <strong>Extensions</strong>
+          <p>Extensions expand an existing character, environment, physics rule, or storyboard beat. They should declare their primary bracket before adding behavior.</p>
+        </div>
+        <div class="card">
+          <strong>Plugins</strong>
+          <p>Plugins are optional modules. A plugin can score collisions, draw replay vectors, add AI narration, or introduce a character behavior without rewriting the base prototype.</p>
+        </div>
+        <div class="card">
+          <strong>Imports</strong>
+          <p>Imports are data sources such as floor-plan SVG, generated site JSON, storyboard markdown, character sheets, or environment manifests.</p>
+        </div>
+      </div>
+      <ul class="hook-list">
+        <li>Character plugins should connect <code>[CHARACTER]</code> lines to <code>[PHYSICS]</code> actions.</li>
+        <li>Environment imports should connect <code>[ENVIRONMENT]</code> lines to <code>[STORYBOARD]</code> beats.</li>
+        <li>Physics extensions should expose hooks such as <code>collision.recorded</code>, <code>body.grounded</code>, <code>rift.opened</code>, and <code>camera.shaken</code>.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    const dressers = {
+      PHYSICS: 'Explains motion, collision, force, camera movement, and pseudo-ground rules.',
+      CHARACTER: 'Names actors and clarifies how they behave in the scene.',
+      ENVIRONMENT: 'Identifies places, props, streets, buildings, and layout context.',
+      STORYBOARD: 'Orders beats, shots, camera direction, and replay moments.',
+      PLUGIN: 'Describes optional behavior modules that extend prototypes.',
+      IMPORT: 'Describes external data or documents consumed by tooling.',
+      TONE: 'Controls the rollout tongue used to explain mechanics clearly.',
+    };
+
+    const input = document.querySelector('#input');
+    const output = document.querySelector('#output');
+    const bracketPanel = document.querySelector('#brackets');
+
+    function classifyText(text) {
+      return text.split('\n').map((line, index) => {
+        const match = line.match(/^\s*\[([A-Z_]+)]\s*(.+)$/);
+        if (!match) return null;
+        const [, bracket, body] = match;
+        const keywords = [...body.matchAll(/[A-Za-z][A-Za-z'-]*/g)].map((item) => item[0].toLowerCase()).slice(0, 8);
+        return { bracket, body, line: index + 1, keywords, dresser: dressers[bracket] || 'Unregistered bracket.' };
+      }).filter(Boolean);
+    }
+
+    function renderBrackets() {
+      bracketPanel.innerHTML = Object.entries(dressers).map(([bracket, description]) => `
+        <div class="card">
+          <span class="tag">[${bracket}]</span>
+          <p>${description}</p>
+        </div>
+      `).join('');
+    }
+
+    function renderOutput() {
+      const classified = classifyText(input.value);
+      output.innerHTML = classified.map((item) => `
+        <div class="output-item">
+          <span class="tag">[${item.bracket}] line ${item.line}</span>
+          <strong>${item.body}</strong>
+          <p>${item.dresser}</p>
+          <p>Keywords: ${item.keywords.join(', ') || 'none'}</p>
+        </div>
+      `).join('') || '<div class="output-item">No bracketed wording found.</div>';
+    }
+
+    document.querySelector('#classify').addEventListener('click', renderOutput);
+    renderBrackets();
+    renderOutput();
+  </script>
+</body>
+</html>

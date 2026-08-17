@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Storyboard Creator Suite</title>
+  <meta name="description" content="A compact creator website for installing prototype games, reviewing storyboard beats, and managing audience and finance analytics." />
+  <link rel="manifest" href="site.webmanifest" />
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07111f;
+      --panel: rgba(10, 18, 32, 0.82);
+      --line: rgba(255, 255, 255, 0.13);
+      --cyan: #67e8f9;
+      --gold: #fde68a;
+      --pink: #fb7185;
+      --green: #86efac;
+      --violet: #c4b5fd;
+      --muted: rgba(236, 254, 255, 0.68);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 16% 10%, rgba(103, 232, 249, 0.2), transparent 28rem),
+        radial-gradient(circle at 82% 8%, rgba(251, 113, 133, 0.17), transparent 26rem),
+        linear-gradient(180deg, #07111f, #030712 58%);
+      color: #ecfeff;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a { color: inherit; }
+
+    .shell {
+      width: min(1240px, calc(100vw - 2rem));
+      margin: 0 auto;
+      padding: 1rem 0 2rem;
+    }
+
+    header,
+    section,
+    .card,
+    .metric,
+    .preview-frame {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(14px);
+    }
+
+    header {
+      position: sticky;
+      top: 0.75rem;
+      z-index: 3;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1rem;
+      align-items: center;
+      padding: 1rem;
+      border-radius: 1.25rem;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(1.35rem, 4vw, 2.7rem);
+      letter-spacing: -0.06em;
+    }
+
+    .brand p,
+    section > p,
+    .card p,
+    .metric span,
+    td,
+    .small {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .brand p { margin: 0.35rem 0 0; }
+
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 0.45rem;
+    }
+
+    nav a,
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    nav a,
+    button {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 0.75rem;
+      padding: 0.62rem 0.78rem;
+      background: rgba(255, 255, 255, 0.075);
+      color: #ecfeff;
+      text-decoration: none;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    button.primary,
+    nav a.primary {
+      color: #06111f;
+      background: linear-gradient(135deg, var(--cyan), var(--gold));
+      border: 0;
+    }
+
+    main {
+      display: grid;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    section {
+      padding: 1rem;
+      border-radius: 1.2rem;
+    }
+
+    h2 {
+      margin: 0 0 0.6rem;
+      color: var(--cyan);
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.13em;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
+      gap: 1rem;
+      align-items: stretch;
+    }
+
+    .hero-copy {
+      padding: 1.25rem;
+      border-radius: 1.2rem;
+      background: linear-gradient(135deg, rgba(103, 232, 249, 0.12), rgba(251, 113, 133, 0.09));
+    }
+
+    .hero-copy h2 {
+      color: var(--gold);
+      font-size: clamp(1.5rem, 4vw, 3.8rem);
+      line-height: 0.98;
+      letter-spacing: -0.08em;
+      text-transform: none;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.7rem;
+      margin-top: 1rem;
+    }
+
+    .metric {
+      padding: 0.85rem;
+      border-radius: 0.9rem;
+      background: rgba(255, 255, 255, 0.055);
+    }
+
+    .metric strong {
+      display: block;
+      color: white;
+      font-size: 1.45rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.8rem;
+    }
+
+    .card {
+      min-width: 0;
+      border-radius: 1rem;
+      padding: 0.9rem;
+      background: rgba(255, 255, 255, 0.055);
+    }
+
+    .card h3 {
+      margin: 0 0 0.45rem;
+      font-size: 1.05rem;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin: 0.65rem 0;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      border-radius: 999px;
+      padding: 0.28rem 0.5rem;
+      color: #06111f;
+      background: var(--cyan);
+      font-size: 0.76rem;
+      font-weight: 900;
+    }
+
+    .tag.gold { background: var(--gold); }
+    .tag.green { background: var(--green); }
+    .tag.pink { background: var(--pink); color: white; }
+    .tag.violet { background: var(--violet); }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-top: 0.75rem;
+    }
+
+    .preview-frame {
+      overflow: hidden;
+      min-height: 560px;
+      border-radius: 1rem;
+      background: #020617;
+    }
+
+    iframe {
+      display: block;
+      width: 100%;
+      height: 560px;
+      border: 0;
+      background: #020617;
+    }
+
+    .suite-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(290px, 0.75fr);
+      gap: 1rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.65rem;
+      margin-bottom: 0.8rem;
+    }
+
+    label {
+      display: grid;
+      gap: 0.25rem;
+      color: rgba(236, 254, 255, 0.72);
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid rgba(103, 232, 249, 0.24);
+      border-radius: 0.75rem;
+      padding: 0.62rem;
+      background: rgba(2, 6, 23, 0.72);
+      color: #ecfeff;
+    }
+
+    textarea {
+      min-height: 7rem;
+      resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 0.9rem;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 0.65rem;
+      text-align: left;
+      font-size: 0.86rem;
+    }
+
+    th {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .library-list,
+    .beat-list {
+      display: grid;
+      gap: 0.55rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .library-list li,
+    .beat-list li {
+      padding: 0.65rem;
+      border-radius: 0.8rem;
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(236, 254, 255, 0.78);
+    }
+
+    .chart {
+      width: 100%;
+      height: 220px;
+      border-radius: 0.9rem;
+      background: rgba(2, 6, 23, 0.58);
+    }
+
+    @media (max-width: 980px) {
+      header,
+      .hero,
+      .suite-layout { grid-template-columns: 1fr; }
+      nav { justify-content: flex-start; }
+      .grid,
+      .metrics,
+      .form-grid { grid-template-columns: 1fr; }
+      iframe { height: 430px; }
+      .preview-frame { min-height: 430px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="brand">
+        <h1>Storyboard Creator Suite</h1>
+        <p>One compact website to install prototype games, pitch storyboard beats, and manage audience + finance signals.</p>
+      </div>
+      <nav aria-label="Creator suite navigation">
+        <a href="#games" class="primary">Games</a>
+        <a href="#storyboards">Storyboards</a>
+        <a href="#creator-suite">Creator Suite</a>
+        <a href="#web-data">Web Data</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="heroTitle">
+        <div class="hero-copy">
+          <h2 id="heroTitle">A full storyboard web site for three prototype games.</h2>
+          <p>Install games into a creator library, preview them in a sandboxed frame, stage playable storyboards, and estimate revenue, visitors, downloads, conversion, and audience signals without leaving the page.</p>
+          <div class="metrics">
+            <div class="metric"><strong id="heroGames">3</strong><span>prototype games</span></div>
+            <div class="metric"><strong id="heroDownloads">0</strong><span>projected downloads</span></div>
+            <div class="metric"><strong id="heroNet">$0</strong><span>creator net</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Installed library</h2>
+          <p class="small">Install buttons save a local creator-library list in this browser. Use it as a lightweight itch.io-style launcher for your prototypes.</p>
+          <ul id="libraryList" class="library-list"></ul>
+          <div class="actions"><button id="installAll" class="primary" type="button">Install all games</button><button id="clearLibrary" type="button">Clear library</button></div>
+        </div>
+      </section>
+
+      <section id="games" aria-labelledby="gamesTitle">
+        <h2 id="gamesTitle">Prototype game installer</h2>
+        <div id="gameGrid" class="grid"></div>
+      </section>
+
+      <section aria-labelledby="previewTitle">
+        <div class="suite-layout">
+          <div>
+            <h2 id="previewTitle">Sandboxed game preview</h2>
+            <div class="preview-frame">
+              <iframe id="gamePreview" title="Sandboxed prototype preview" sandbox="allow-scripts allow-pointer-lock" src="camera-rift-engine/src/index.html"></iframe>
+            </div>
+          </div>
+          <aside class="card">
+            <h2>Launch notes</h2>
+            <p id="launchNotes">Camera Rift Engine is selected. Preview runs in a sandboxed iframe with scripts and pointer-lock input only.</p>
+            <div class="tag-row"><span class="tag">sandbox</span><span class="tag gold">HTML5</span><span class="tag green">itch-ready</span></div>
+            <p class="small">For itch.io, upload a game's distribution folder or a zipped copy of the game page and assets. This suite is the portfolio/storefront layer.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section id="storyboards" aria-labelledby="storyTitle">
+        <h2 id="storyTitle">Storyboard web pages</h2>
+        <div id="storyboardGrid" class="grid"></div>
+      </section>
+
+      <section id="creator-suite" aria-labelledby="creatorTitle">
+        <h2 id="creatorTitle">Creator finance + audience manager</h2>
+        <div class="form-grid">
+          <label>Price ($)<input id="price" type="number" min="0" step="0.5" value="4.99" /></label>
+          <label>Visitors<input id="visitors" type="number" min="0" step="1" value="12400" /></label>
+          <label>Downloads<input id="downloads" type="number" min="0" step="1" value="1860" /></label>
+          <label>Platform fee (%)<input id="fee" type="number" min="0" max="100" step="1" value="10" /></label>
+        </div>
+        <div class="metrics">
+          <div class="metric"><strong id="grossRevenue">$0</strong><span>gross revenue</span></div>
+          <div class="metric"><strong id="netRevenue">$0</strong><span>creator net</span></div>
+          <div class="metric"><strong id="conversionRate">0%</strong><span>visitor → download</span></div>
+        </div>
+        <canvas id="financeChart" class="chart" width="900" height="260" aria-label="Finance and audience chart"></canvas>
+      </section>
+
+      <section id="web-data" aria-labelledby="webDataTitle">
+        <div class="suite-layout">
+          <div>
+            <h2 id="webDataTitle">Visitor + download web data navigator</h2>
+            <p>Use the search box to navigate sample audience channels, downloads, and revenue. Paste CSV rows to replace the sample data.</p>
+            <div class="form-grid">
+              <label>Search channel / region / game<input id="dataSearch" placeholder="e.g. itch, Long Island, Wobble" /></label>
+              <label>Focus game<select id="focusGame"><option value="all">All games</option></select></label>
+              <label>Sort by<select id="sortBy"><option value="downloads">Downloads</option><option value="visitors">Visitors</option><option value="revenue">Revenue</option><option value="conversion">Conversion</option></select></label>
+              <label>Convenience mode<select id="mode"><option>Creator overview</option><option>Audience scouting</option><option>Finance review</option></select></label>
+            </div>
+            <table aria-label="Visitor and download data table">
+              <thead><tr><th>Game</th><th>Channel</th><th>Region</th><th>Visitors</th><th>Downloads</th><th>Conv.</th><th>Revenue</th></tr></thead>
+              <tbody id="dataRows"></tbody>
+            </table>
+          </div>
+          <aside class="card">
+            <h2>CSV import</h2>
+            <p class="small">Format: game,channel,region,visitors,downloads,revenue. This stays local in the browser.</p>
+            <textarea id="csvInput">Camera Rift Engine,itch.io,Northeast creators,4200,650,3243.50
+Wobble House Rally,devlog,Physics fans,3100,430,2145.70
+Long Island Lumina,social,Long Island suburbs,5100,780,3892.20</textarea>
+            <div class="actions"><button id="applyCsv" class="primary" type="button">Apply CSV</button><button id="resetCsv" type="button">Reset sample</button></div>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const games = [
+      {
+        id: 'camera-rift',
+        title: 'Camera Rift Engine',
+        path: 'camera-rift-engine/src/index.html',
+        pitch: 'Bird\'s-eye teleport engine where objects materialize through camera rifts with neon physics staging.',
+        tags: ['teleport', 'physics', 'neon'],
+        beats: ['Drone opens a lens gate', 'Objects teleport into the arena', 'Camera shake sells the impact', 'Player steers the living camera'],
+      },
+      {
+        id: 'wobble-house',
+        title: 'Wobble House Rally',
+        path: 'wobble-house-rally-ai-collider/src/index.html',
+        pitch: 'Ground-up collision story where a funny-house car hits props while an AI observer explains physics.',
+        tags: ['collision', 'AI observer', 'storyboard'],
+        beats: ['Funny house wakes up', 'Rally car taps the first cone', 'Barrels chain-react', 'AI Lookout records replay beats'],
+      },
+      {
+        id: 'long-island-lumina',
+        title: 'Long Island Lumina',
+        path: 'long-island-lumina-sandbox/src/game.html',
+        pitch: 'Itch-ready talent platformer staged with progressive Long Island-inspired lighting and city-state scenes.',
+        tags: ['itch.io', 'lighting', 'platformer'],
+        beats: ['Lighthouse Commons opens', 'Performer collects sparks', 'Creator places spotlights', 'Boardwalk Future closes the reel'],
+      },
+    ];
+
+    const sampleRows = [
+      { game: 'Camera Rift Engine', channel: 'itch.io', region: 'Northeast creators', visitors: 4200, downloads: 650, revenue: 3243.50 },
+      { game: 'Camera Rift Engine', channel: 'portfolio', region: 'Game jams', visitors: 1800, downloads: 220, revenue: 1097.80 },
+      { game: 'Wobble House Rally', channel: 'devlog', region: 'Physics fans', visitors: 3100, downloads: 430, revenue: 2145.70 },
+      { game: 'Wobble House Rally', channel: 'newsletter', region: 'Storyboard artists', visitors: 950, downloads: 155, revenue: 773.45 },
+      { game: 'Long Island Lumina', channel: 'social', region: 'Long Island suburbs', visitors: 5100, downloads: 780, revenue: 3892.20 },
+      { game: 'Long Island Lumina', channel: 'press kit', region: 'HTML5 curators', visitors: 1250, downloads: 240, revenue: 1197.60 },
+    ];
+
+    let rows = [...sampleRows];
+    const libraryKey = 'storyboardCreatorSuite.installedGames';
+    const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+
+    const gameGrid = document.querySelector('#gameGrid');
+    const storyboardGrid = document.querySelector('#storyboardGrid');
+    const libraryList = document.querySelector('#libraryList');
+    const gamePreview = document.querySelector('#gamePreview');
+    const launchNotes = document.querySelector('#launchNotes');
+    const focusGame = document.querySelector('#focusGame');
+
+    function installedGames() {
+      return JSON.parse(localStorage.getItem(libraryKey) || '[]');
+    }
+
+    function saveInstalled(ids) {
+      localStorage.setItem(libraryKey, JSON.stringify([...new Set(ids)]));
+      renderLibrary();
+      renderGames();
+    }
+
+    function installGame(id) {
+      saveInstalled([...installedGames(), id]);
+    }
+
+    function uninstallGame(id) {
+      saveInstalled(installedGames().filter((item) => item !== id));
+    }
+
+    function previewGame(id) {
+      const game = games.find((item) => item.id === id) || games[0];
+      gamePreview.src = game.path;
+      launchNotes.textContent = `${game.title} is selected. Preview runs in a sandboxed iframe with scripts and pointer-lock input only.`;
+    }
+
+    function renderGames() {
+      const installed = installedGames();
+      gameGrid.innerHTML = games.map((game) => {
+        const isInstalled = installed.includes(game.id);
+        return `
+          <article class="card">
+            <h3>${game.title}</h3>
+            <p>${game.pitch}</p>
+            <div class="tag-row">${game.tags.map((tag, index) => `<span class="tag ${['', 'gold', 'green', 'pink'][index] || ''}">${tag}</span>`).join('')}</div>
+            <div class="actions">
+              <button class="primary" type="button" data-preview="${game.id}">Preview</button>
+              <button type="button" data-install="${game.id}">${isInstalled ? 'Installed ✓' : 'Install to suite'}</button>
+              ${isInstalled ? `<button type="button" data-uninstall="${game.id}">Remove</button>` : ''}
+            </div>
+          </article>`;
+      }).join('');
+    }
+
+    function renderStoryboards() {
+      storyboardGrid.innerHTML = games.map((game) => `
+        <article class="card">
+          <h3>${game.title}</h3>
+          <ul class="beat-list">${game.beats.map((beat, index) => `<li><strong>${String(index + 1).padStart(2, '0')}</strong> · ${beat}</li>`).join('')}</ul>
+        </article>
+      `).join('');
+    }
+
+    function renderLibrary() {
+      const installed = installedGames();
+      libraryList.innerHTML = installed.length
+        ? installed.map((id) => {
+          const game = games.find((item) => item.id === id);
+          return `<li><strong>${game.title}</strong><br><span class="small">Installed locally · <a href="${game.path}">open full page</a></span></li>`;
+        }).join('')
+        : '<li>No games installed yet. Install a prototype below to build your creator library.</li>';
+    }
+
+    function renderSelectors() {
+      focusGame.innerHTML = '<option value="all">All games</option>' + games.map((game) => `<option>${game.title}</option>`).join('');
+    }
+
+    function financeInputs() {
+      return {
+        price: Number(document.querySelector('#price').value || 0),
+        visitors: Number(document.querySelector('#visitors').value || 0),
+        downloads: Number(document.querySelector('#downloads').value || 0),
+        fee: Number(document.querySelector('#fee').value || 0),
+      };
+    }
+
+    function updateFinance() {
+      const { price, visitors, downloads, fee } = financeInputs();
+      const gross = price * downloads;
+      const net = gross * (1 - fee / 100);
+      const conversion = visitors ? downloads / visitors : 0;
+      document.querySelector('#grossRevenue').textContent = money.format(gross);
+      document.querySelector('#netRevenue').textContent = money.format(net);
+      document.querySelector('#conversionRate').textContent = `${(conversion * 100).toFixed(1)}%`;
+      document.querySelector('#heroDownloads').textContent = downloads.toLocaleString();
+      document.querySelector('#heroNet').textContent = money.format(net);
+      drawChart(visitors, downloads, gross, net);
+    }
+
+    function drawChart(visitors, downloads, gross, net) {
+      const canvas = document.querySelector('#financeChart');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const values = [visitors, downloads, gross, net];
+      const labels = ['Visitors', 'Downloads', 'Gross', 'Net'];
+      const colors = ['#67e8f9', '#86efac', '#fde68a', '#fb7185'];
+      const max = Math.max(...values, 1);
+      values.forEach((value, index) => {
+        const width = (value / max) * 680;
+        const y = 35 + index * 54;
+        ctx.fillStyle = 'rgba(255,255,255,0.08)';
+        ctx.fillRect(150, y, 700, 28);
+        ctx.fillStyle = colors[index];
+        ctx.fillRect(150, y, width, 28);
+        ctx.fillStyle = '#ecfeff';
+        ctx.font = '700 18px sans-serif';
+        ctx.fillText(labels[index], 24, y + 20);
+        ctx.fillText(index > 1 ? money.format(value) : Math.round(value).toLocaleString(), 160 + width, y + 20);
+      });
+    }
+
+    function filteredRows() {
+      const query = document.querySelector('#dataSearch').value.toLowerCase();
+      const game = focusGame.value;
+      const sortBy = document.querySelector('#sortBy').value;
+      return rows
+        .filter((row) => game === 'all' || row.game === game)
+        .filter((row) => `${row.game} ${row.channel} ${row.region}`.toLowerCase().includes(query))
+        .sort((a, b) => {
+          const av = sortBy === 'conversion' ? a.downloads / Math.max(a.visitors, 1) : a[sortBy];
+          const bv = sortBy === 'conversion' ? b.downloads / Math.max(b.visitors, 1) : b[sortBy];
+          return bv - av;
+        });
+    }
+
+    function renderRows() {
+      document.querySelector('#dataRows').innerHTML = filteredRows().map((row) => {
+        const conversion = row.visitors ? row.downloads / row.visitors : 0;
+        return `<tr><td>${row.game}</td><td>${row.channel}</td><td>${row.region}</td><td>${row.visitors.toLocaleString()}</td><td>${row.downloads.toLocaleString()}</td><td>${(conversion * 100).toFixed(1)}%</td><td>${money.format(row.revenue)}</td></tr>`;
+      }).join('');
+    }
+
+    function applyCsv() {
+      const parsed = document.querySelector('#csvInput').value.split('\n').map((line) => line.trim()).filter(Boolean).map((line) => {
+        const [game, channel, region, visitors, downloads, revenue] = line.split(',').map((item) => item.trim());
+        return { game, channel, region, visitors: Number(visitors || 0), downloads: Number(downloads || 0), revenue: Number(revenue || 0) };
+      });
+      rows = parsed.filter((row) => row.game && row.channel && row.region);
+      renderRows();
+    }
+
+    document.addEventListener('click', (event) => {
+      const install = event.target.closest('[data-install]');
+      const uninstall = event.target.closest('[data-uninstall]');
+      const preview = event.target.closest('[data-preview]');
+      if (install) installGame(install.dataset.install);
+      if (uninstall) uninstallGame(uninstall.dataset.uninstall);
+      if (preview) previewGame(preview.dataset.preview);
+    });
+
+    document.querySelector('#installAll').addEventListener('click', () => saveInstalled(games.map((game) => game.id)));
+    document.querySelector('#clearLibrary').addEventListener('click', () => saveInstalled([]));
+    document.querySelectorAll('#price, #visitors, #downloads, #fee').forEach((input) => input.addEventListener('input', updateFinance));
+    document.querySelectorAll('#dataSearch, #focusGame, #sortBy, #mode').forEach((input) => input.addEventListener('input', renderRows));
+    document.querySelector('#applyCsv').addEventListener('click', applyCsv);
+    document.querySelector('#resetCsv').addEventListener('click', () => { rows = [...sampleRows]; renderRows(); });
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('suite-service-worker.js').catch(() => {});
+    }
+
+    renderSelectors();
+    renderLibrary();
+    renderGames();
+    renderStoryboards();
+    updateFinance();
+    renderRows();
+  </script>
+</body>
+</html>
